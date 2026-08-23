@@ -63,7 +63,7 @@ $medicines = $stmt->fetchAll();
             </span>
             <h2>Authentic Healthcare &amp; Medicines</h2>
             <p>Explore our real-time pharmaceutical catalog and check product availability.</p>
-            <form action="index.php" method="GET" style="display: flex; max-width: 560px; margin: 0 auto; box-shadow: var(--shadow-md); border-radius: 30px; overflow: hidden; border: 1.5px solid var(--border); background: var(--surface);">
+            <form action="index.php" method="GET" class="storefront-search-form">
                 <input type="text" name="search" id="publicSearchInput" value="<?= htmlspecialchars($search) ?>" placeholder="Search medicines by name or keyword..." style="flex-grow: 1; border: none; padding: 0.85rem 1.4rem; font-size: 0.95rem; outline: none; background: transparent; font-family: inherit;">
                 <button type="submit" class="btn btn-primary" style="border-radius: 0; padding: 0 1.8rem; font-size: 0.92rem; height: auto; border: none; margin: 0;">Search</button>
             </form>
