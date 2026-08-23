@@ -238,7 +238,7 @@ $formattedDate = date('d M Y');
              TAB 2: BILLING & POS (POINT OF SALE)
              =================================================================== -->
         <div id="pos-tab" class="tab-pane">
-            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.75rem; align-items: start;">
+            <div class="pos-billing-grid">
                 
                 <!-- Left Column: Quick Select Product Catalog Grid -->
                 <div class="panel" style="margin-bottom: 0;">
