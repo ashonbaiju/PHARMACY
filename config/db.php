@@ -52,16 +52,16 @@ try {
     // Table may not exist yet if schema was not run
 }
 
-/**
- * Standard JSON response helper for API scripts
- */
-function sendJsonResponse($success, $message = '', $data = [], $statusCode = 200) {
-    http_response_code($statusCode);
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => $success,
-        'message' => $message,
-        'data' => $data
-    ]);
-    exit;
+// Standard JSON response helper for API scripts
+if (!function_exists('sendJsonResponse')) {
+    function sendJsonResponse($success, $message = '', $data = [], $statusCode = 200) {
+        http_response_code($statusCode);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => $success,
+            'message' => $message,
+            'data' => $data
+        ]);
+        exit;
+    }
 }
