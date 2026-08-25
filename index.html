@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaCare - Modern Pharmacy Management</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div class="container navbar">
+            <div class="brand">
+                <div class="brand-icon">P</div>
+                <div class="brand-text">
+                    <h1>PharmaCare</h1>
+                    <p>Pharmacy Storefront</p>
+                </div>
+            </div>
+            <div class="nav-actions" id="navActions">
+                <!-- Session status button dynamically populated here -->
+                <span style="color:var(--text-muted); font-size:0.85rem;">Loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <span style="display:inline-block; padding:0.3rem 0.85rem; font-size:0.75rem; font-weight:700; color:var(--primary); background:var(--primary-light); border:1px solid var(--primary-border); border-radius:30px; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.04em;">
+                Live Storefront Inventory
+            </span>
+            <h2>Authentic Healthcare &amp; Medicines</h2>
+            <p>Explore our real-time pharmaceutical catalog and check product availability.</p>
+            <form action="index.html" method="GET" class="storefront-search-form">
+                <input type="text" name="search" id="publicSearchInput" placeholder="Search medicines by name or keyword..." style="flex-grow: 1; border: none; padding: 0.85rem 1.4rem; font-size: 0.95rem; outline: none; background: transparent; font-family: inherit;">
+                <button type="submit" class="btn btn-primary" style="border-radius: 0; padding: 0 1.8rem; font-size: 0.92rem; height: auto; border: none; margin: 0;">Search</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Main Content Catalog -->
+    <main class="container" style="flex-grow: 1;">
+        <div class="medicine-grid" id="publicMedicineGrid">
+            <!-- Dynamic medicines list populated here -->
+            <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+                <h3>Loading catalog medicines...</h3>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="container">
+            <p>&copy; 2026 PharmaCare System. Static Frontend + Local PHP API.</p>
+        </div>
+    </footer>
+
+    <!-- Storefront Script Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserSession();
+            loadCatalogMedicines();
+        });
+
+        // 1. Check if user is logged in to toggle Dashboard/Login button
+        async function checkUserSession() {
+            const navActions = document.getElementById('navActions');
+            try {
+                const res = await fetch('api/auth.php?action=check');
+                const result = await res.json();
+                
+                if (result.success) {
+                    navActions.innerHTML = `
+                        <a href="dashboard.html" class="btn btn-secondary btn-sm" style="border-radius:20px; font-weight:600;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            Dashboard
+                        </a>
+                    `;
+                } else {
+                    navActions.innerHTML = `
+                        <a href="login.html" class="btn btn-secondary btn-sm" style="border-radius:20px; font-weight:600;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Login
+                        </a>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                navActions.innerHTML = `
+                    <a href="login.html" class="btn btn-secondary btn-sm" style="border-radius:20px; font-weight:600;">Login</a>
+                `;
+            }
+        }
+
+        // 2. Fetch medicines list from backend using search query parameters
+        async function loadCatalogMedicines() {
+            const grid = document.getElementById('publicMedicineGrid');
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchVal = urlParams.get('search') || '';
+
+            // Put current search value back into input field
+            const searchInput = document.getElementById('publicSearchInput');
+            if (searchInput) searchInput.value = searchVal;
+
+            try {
+                const res = await fetch(`api/medicines.php?action=list&q=${encodeURIComponent(searchVal)}`);
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    grid.innerHTML = '';
+                    result.data.forEach(med => {
+                        let stockClass = 'badge-success';
+                        let stockText = 'In Stock';
+                        
+                        const stockQty = parseInt(med.stock_quantity);
+                        if (stockQty <= 0) {
+                            stockClass = 'badge-danger';
+                            stockText = 'Out of Stock';
+                        } else if (stockQty <= 10) {
+                            stockClass = 'badge-warning';
+                            stockText = `Low (${stockQty})`;
+                        }
+
+                        const card = document.createElement('div');
+                        card.className = 'medicine-card';
+                        card.innerHTML = `
+                            <div class="card-img-wrapper">
+                                <img src="${med.image_path}" alt="${escapeHtml(med.name)}" onerror="this.src='assets/images/default-medicine.svg'">
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">${escapeHtml(med.name)}</h3>
+                                <p class="card-desc">${escapeHtml(med.description || 'No detailed description available.')}</p>
+                                <div class="card-footer">
+                                    <span class="price-tag">₹${parseFloat(med.price).toFixed(2)}</span>
+                                    <span class="stock-badge ${stockClass}">${stockText}</span>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                } else {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+                            <h3 style="margin-bottom:0.5rem; color: var(--text-main);">No medicines found</h3>
+                            ${searchVal !== '' ? `
+                                <p style="margin-bottom: 1.5rem;">We couldn't find any medicines matching "<strong>${escapeHtml(searchVal)}</strong>".</p>
+                                <a href="index.html" class="btn btn-secondary btn-sm">Clear Search &amp; View All</a>
+                            ` : `
+                                <p>Authorized staff can log in to populate products or import supplier CSV files.</p>
+                            `}
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--danger);">
+                        <h3>Error loading catalog.</h3>
+                        <p>Check if XAMPP Apache/MySQL services are running locally.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Helper to escape HTML tags and avoid scripts injection
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
