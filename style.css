@@ -444,6 +444,37 @@ textarea.form-control {
   font-size: 0.86rem;
 }
 
+/* Top Header Navigation Links */
+.top-nav-links {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nav-item {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-item:hover {
+  color: var(--text-main);
+  background: var(--surface-alt);
+}
+
+.nav-item.active {
+  color: var(--primary);
+  background: var(--primary-light);
+  font-weight: 700;
+}
+
 /* Greeting Banner */
 .greeting-banner {
   display: flex;

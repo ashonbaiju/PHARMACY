@@ -10,7 +10,13 @@
 
     <!-- Header Navbar -->
     <header class="app-header">
-        <div class="container navbar" style="justify-content: flex-end;">
+        <div class="container navbar">
+            <nav class="top-nav-links">
+                <a href="dashboard.html" class="nav-item">Dashboard Overview</a>
+                <a href="medicines.html" class="nav-item">Medicine Management</a>
+                <a href="pos.html" class="nav-item">Billing &amp; POS</a>
+                <a href="sales.html" class="nav-item active">Sales History</a>
+            </nav>
             <div class="nav-actions">
                 <a href="index.html" class="btn btn-secondary btn-sm" target="_blank">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -41,14 +47,6 @@
                 </button>
             </div>
         </div>
-
-        <!-- Navigation Bar for Pages -->
-        <nav class="tab-nav">
-            <a href="dashboard.html" class="tab-btn">Dashboard Overview</a>
-            <a href="medicines.html" class="tab-btn">Medicine Management</a>
-            <a href="pos.html" class="tab-btn">Billing &amp; POS</a>
-            <a href="sales.html" class="tab-btn active">Sales History</a>
-        </nav>
 
         <!-- SALES HISTORY TABLE PANEL -->
         <div class="panel" style="margin-bottom: 0;">
