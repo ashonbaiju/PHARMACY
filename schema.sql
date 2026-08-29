@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `medicines` (
     `price` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     `stock_quantity` INT NOT NULL DEFAULT 0,
     `expiry_date` DATE NOT NULL,
-    `image_path` VARCHAR(255) DEFAULT 'assets/images/default-medicine.png',
+    `image_path` VARCHAR(255) DEFAULT 'default-medicine.svg',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -50,10 +50,10 @@ ON DUPLICATE KEY UPDATE `password_hash` = '$2y$10$UYTfOj33LjglZ82eDIO2ouFvqvaAeQ
 
 -- Seed Sample Medicines
 INSERT INTO `medicines` (`name`, `description`, `price`, `stock_quantity`, `expiry_date`, `image_path`) VALUES
-('Paracetamol 500mg', 'Effective relief from mild to moderate pain and fever.', 4.50, 150, '2027-06-30', 'assets/images/default-medicine.png'),
-('Amoxicillin 250mg', 'Antibiotic used to treat a wide variety of bacterial infections.', 12.00, 80, '2026-12-15', 'assets/images/default-medicine.png'),
-('Ibuprofen 400mg', 'Nonsteroidal anti-inflammatory drug (NSAID) for pain, fever, and inflammation.', 6.25, 12, '2026-09-01', 'assets/images/default-medicine.png'),
-('Omeprazole 20mg', 'Reduces the amount of acid your stomach produces.', 15.80, 45, '2027-01-20', 'assets/images/default-medicine.png'),
-('Cetirizine 10mg', 'Antihistamine that treats allergy symptoms such as sneezing and runny nose.', 5.00, 5, '2026-08-30', 'assets/images/default-medicine.png'),
-('Metformin 500mg', 'Used with proper diet and exercise program to control high blood sugar in type 2 diabetes.', 9.50, 200, '2028-03-15', 'assets/images/default-medicine.png'),
-('Vitamin C 1000mg', 'Immune support supplement with antioxidants.', 8.00, 95, '2027-11-10', 'assets/images/default-medicine.png');
+('Paracetamol 500mg', 'Effective relief from mild to moderate pain and fever.', 4.50, 150, '2027-06-30', 'default-medicine.svg'),
+('Amoxicillin 250mg', 'Antibiotic used to treat a wide variety of bacterial infections.', 12.00, 80, '2026-12-15', 'default-medicine.svg'),
+('Ibuprofen 400mg', 'Nonsteroidal anti-inflammatory drug (NSAID) for pain, fever, and inflammation.', 6.25, 12, '2026-09-01', 'default-medicine.svg'),
+('Omeprazole 20mg', 'Reduces the amount of acid your stomach produces.', 15.80, 45, '2027-01-20', 'default-medicine.svg'),
+('Cetirizine 10mg', 'Antihistamine that treats allergy symptoms such as sneezing and runny nose.', 5.00, 5, '2026-08-30', 'default-medicine.svg'),
+('Metformin 500mg', 'Used with proper diet and exercise program to control high blood sugar in type 2 diabetes.', 9.50, 200, '2028-03-15', 'default-medicine.svg'),
+('Vitamin C 1000mg', 'Immune support supplement with antioxidants.', 8.00, 95, '2027-11-10', 'default-medicine.svg');

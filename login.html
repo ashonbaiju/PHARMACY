@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Portal - PharmaCare</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body style="background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 60%);">
 
@@ -66,7 +66,7 @@
     <!-- Footer -->
     <footer class="app-footer">
         <div class="container">
-            <p>&copy; 2026 PharmaCare System. Static Frontend + Local PHP API.</p>
+            <p>&copy; 2026 PharmaCare System.</p>
         </div>
     </footer>
 
@@ -82,14 +82,12 @@
         // Redirect immediately if user is already logged in
         async function checkActiveSession() {
             try {
-                const res = await fetch('api/auth.php?action=check');
+                const res = await fetch('api.php?action=check');
                 const result = await res.json();
                 if (result.success) {
                     window.location.href = 'dashboard.html';
                 }
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) {}
         }
 
         // Handle AJAX form submission
@@ -112,7 +110,7 @@
                 submitBtn.textContent = 'Verifying...';
                 errorBox.style.display = 'none';
 
-                const res = await fetch('api/auth.php?action=login', {
+                const res = await fetch('api.php?action=login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
@@ -126,7 +124,6 @@
                     errorBox.style.display = 'flex';
                 }
             } catch (err) {
-                console.error(err);
                 errorMessage.textContent = 'Connection error. Check XAMPP services.';
                 errorBox.style.display = 'flex';
             } finally {

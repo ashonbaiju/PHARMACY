@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Management Panel - PharmaCare</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="style.css">
     <!-- Chart.js CDN for Analytics Graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- jsPDF CDN for POS Receipt PDF Generation -->
@@ -421,56 +421,51 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/medicines.js"></script>
-    <script src="assets/js/pos.js"></script>
-    <script src="assets/js/dashboard.js"></script>
+    <!-- Edit Medicine Modal -->
+    <div id="editMedicineModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3>Edit Medicine</h3>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('editMedicineModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editMedicineForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editMedId" name="id">
+                    <div class="form-group">
+                        <label class="form-label" for="editMedName">Medicine Name *</label>
+                        <input type="text" id="editMedName" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="editMedDesc">Description</label>
+                        <textarea id="editMedDesc" name="description" class="form-control" placeholder="Key therapeutic uses, dosage info..."></textarea>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label" for="editMedPrice">Price (₹) *</label>
+                            <input type="number" step="0.01" id="editMedPrice" name="price" class="form-control mono" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editMedStock">Stock Count *</label>
+                            <input type="number" id="editMedStock" name="stock_quantity" class="form-control mono" required>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label" for="editMedExpiry">Expiry Date *</label>
+                            <input type="date" id="editMedExpiry" name="expiry_date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editMedImage">Change Image</label>
+                            <input type="file" id="editMedImage" name="image" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">Update Medicine</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-    <!-- Global Workspace Initializer -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
-            populateCurrentDate();
-        });
-
-        // 1. Run strict session verification
-        async function checkAuth() {
-            try {
-                const res = await fetch('api/auth.php?action=check');
-                const result = await res.json();
-                if (!result.success) {
-                    window.location.href = 'login.html';
-                }
-            } catch (err) {
-                console.error(err);
-                window.location.href = 'login.html';
-            }
-        }
-
-        // 2. Set client date dynamically
-        function populateCurrentDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-            const dateStr = new Date().toLocaleDateString('en-US', options);
-            const datePill = document.getElementById('currentDatePill');
-            if (datePill) {
-                datePill.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    ${dateStr}
-                `;
-            }
-        }
-
-        // 3. Perform Session Logout
-        async function handleLogout(e) {
-            e.preventDefault();
-            try {
-                await fetch('api/auth.php?action=logout');
-                window.location.href = 'index.html';
-            } catch (err) {
-                window.location.href = 'index.html';
-            }
-        }
-    </script>
+    <!-- Single Unified Script -->
+    <script src="script.js"></script>
 </body>
 </html>
