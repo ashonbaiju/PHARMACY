@@ -105,32 +105,6 @@ async function loadDashboardStats() {
         if (totalProductsElem) totalProductsElem.textContent = data.total_products;
         if (lowStockCountElem) lowStockCountElem.textContent = data.low_stock_count;
 
-        // Stock health progress bars
-        const total = data.total_products || 1;
-        const healthyPct = Math.round((data.healthy_stock_count / total) * 100);
-        const lowPct = Math.round((data.low_stock_count / total) * 100);
-        const outPct = Math.max(0, 100 - (healthyPct + lowPct));
-
-        const healthyBar = document.getElementById('healthyStockBar');
-        const lowBar = document.getElementById('lowStockBar');
-        const outBar = document.getElementById('outOfStockBar');
-
-        if (healthyBar) {
-            healthyBar.style.width = healthyPct + '%';
-            const el = document.getElementById('healthyStockPercent');
-            if (el) el.textContent = `${healthyPct}% (${data.healthy_stock_count})`;
-        }
-        if (lowBar) {
-            lowBar.style.width = lowPct + '%';
-            const el = document.getElementById('lowStockPercent');
-            if (el) el.textContent = `${lowPct}% (${data.low_stock_count})`;
-        }
-        if (outBar) {
-            outBar.style.width = outPct + '%';
-            const el = document.getElementById('outOfStockPercent');
-            if (el) el.textContent = `${outPct}% (${data.out_of_stock_count})`;
-        }
-
         // Recent sales table
         const recentBody = document.getElementById('recentSalesTableBody');
         if (recentBody) {
