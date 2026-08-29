@@ -446,37 +446,39 @@ textarea.form-control {
 
 /* Minimal Top Header Navigation Links */
 .top-nav-links {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-  background: var(--surface-alt);
-  padding: 0.25rem;
-  border-radius: 30px;
-  border: 1px solid var(--border);
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  background: var(--surface-alt) !important;
+  padding: 0.3rem 0.45rem !important;
+  border-radius: 50px !important;
+  border: 1px solid var(--border) !important;
 }
 
-.nav-item {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 0.4rem 0.95rem;
-  border-radius: 20px;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
+.top-nav-links .nav-item {
+  color: var(--text-muted) !important;
+  text-decoration: none !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  padding: 0.45rem 1rem !important;
+  border-radius: 30px !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  background: transparent !important;
 }
 
-.nav-item:hover {
-  color: var(--text-main);
+.top-nav-links .nav-item:hover {
+  color: var(--text-main) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
 }
 
-.nav-item.active {
-  color: var(--primary);
-  background: var(--surface);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  font-weight: 700;
+.top-nav-links .nav-item.active {
+  color: var(--primary) !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  font-weight: 700 !important;
 }
 
 /* Greeting Banner */
