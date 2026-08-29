@@ -62,7 +62,7 @@ switch ($action) {
     case 'list':
     case 'medicines':
     case 'search':
-        $query = trim($_GET['q'] ?? '');
+        $query = trim($_GET['q'] ?? $_GET['search'] ?? '');
         if ($query !== '') {
             $stmt = $pdo->prepare("
                 SELECT id, name, description, price, stock_quantity, expiry_date, image_path 

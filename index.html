@@ -27,7 +27,7 @@
                 <h2>Medicine Catalog</h2>
                 <p>Explore our healthcare medicines and check live stock availability.</p>
             </div>
-            <form action="index.html" method="GET" style="display: flex; gap: 0.5rem; align-items: center;">
+            <form id="publicSearchForm" style="display: flex; gap: 0.5rem; align-items: center;">
                 <input type="text" name="search" id="publicSearchInput" class="form-control" placeholder="Search medicines..." style="max-width: 240px; height: 36px;">
                 <button type="submit" class="btn btn-primary" style="height: 36px; white-space: nowrap;">Search</button>
             </form>
@@ -44,9 +44,48 @@
 
     <!-- Storefront Script Logic -->
     <script>
+        let allCatalogMedicines = [];
+
         document.addEventListener('DOMContentLoaded', () => {
+            if (window.location.protocol === 'file:') {
+                const grid = document.getElementById('publicMedicineGrid');
+                if (grid) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem;">
+                            <h3 style="color: var(--danger); margin-bottom: 0.5rem;">Running on local file protocol</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 1rem;">PHP APIs require running via XAMPP Localhost URL.</p>
+                            <a href="http://localhost/pharma/index.html" class="btn btn-primary">Open via Localhost</a>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
             checkUserSession();
-            loadCatalogMedicines();
+            
+            const searchForm = document.getElementById('publicSearchForm');
+            const searchInput = document.getElementById('publicSearchInput');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialSearch = urlParams.get('search') || '';
+            if (searchInput) searchInput.value = initialSearch;
+
+            loadCatalogMedicines(initialSearch);
+
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    const val = searchInput.value.trim();
+                    filterAndRenderMedicines(val);
+                });
+            }
+
+            if (searchForm) {
+                searchForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const val = searchInput ? searchInput.value.trim() : '';
+                    filterAndRenderMedicines(val);
+                });
+            }
         });
 
         // 1. Check if user is logged in
@@ -77,62 +116,17 @@
         }
 
         // 2. Fetch medicines list from backend
-        async function loadCatalogMedicines() {
+        async function loadCatalogMedicines(searchVal = '') {
             const grid = document.getElementById('publicMedicineGrid');
-            const urlParams = new URLSearchParams(window.location.search);
-            const searchVal = urlParams.get('search') || '';
-
-            const searchInput = document.getElementById('publicSearchInput');
-            if (searchInput) searchInput.value = searchVal;
-
             try {
                 const res = await fetch(`api.php?action=medicines&q=${encodeURIComponent(searchVal)}`);
                 const result = await res.json();
 
-                if (result.success && result.data.length > 0) {
-                    grid.innerHTML = '';
-                    result.data.forEach(med => {
-                        let stockClass = 'badge-success';
-                        let stockText = 'In Stock';
-                        
-                        const stockQty = parseInt(med.stock_quantity);
-                        if (stockQty <= 0) {
-                            stockClass = 'badge-danger';
-                            stockText = 'Out of Stock';
-                        } else if (stockQty <= 10) {
-                            stockClass = 'badge-warning';
-                            stockText = `Low (${stockQty})`;
-                        }
-
-                        const card = document.createElement('div');
-                        card.className = 'medicine-card';
-                        card.innerHTML = `
-                            <div class="card-img-wrapper">
-                                <img src="${med.image_path}" alt="${escapeHtml(med.name)}" onerror="this.src='default-medicine.svg'">
-                            </div>
-                            <div class="card-body">
-                                <h3 class="card-title">${escapeHtml(med.name)}</h3>
-                                <p class="card-desc">${escapeHtml(med.description || 'No detailed description available.')}</p>
-                                <div class="card-footer">
-                                    <span class="price-tag">₹${parseFloat(med.price).toFixed(2)}</span>
-                                    <span class="stock-badge ${stockClass}">${stockText}</span>
-                                </div>
-                            </div>
-                        `;
-                        grid.appendChild(card);
-                    });
+                if (result.success) {
+                    allCatalogMedicines = result.data || [];
+                    filterAndRenderMedicines(searchVal);
                 } else {
-                    grid.innerHTML = `
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-                            <h3 style="margin-bottom:0.5rem; color: var(--text-main);">No medicines found</h3>
-                            ${searchVal !== '' ? `
-                                <p style="margin-bottom: 1.5rem;">We couldn't find any medicines matching "<strong>${escapeHtml(searchVal)}</strong>".</p>
-                                <a href="index.html" class="btn btn-secondary btn-sm">Clear Search &amp; View All</a>
-                            ` : `
-                                <p>Log in to admin dashboard to add medicines.</p>
-                            `}
-                        </div>
-                    `;
+                    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem 1rem;">No medicines available.</div>';
                 }
             } catch (err) {
                 grid.innerHTML = `
@@ -142,6 +136,68 @@
                     </div>
                 `;
             }
+        }
+
+        function filterAndRenderMedicines(keyword = '') {
+            const grid = document.getElementById('publicMedicineGrid');
+            const search = keyword.toLowerCase().trim();
+
+            const filtered = allCatalogMedicines.filter(m => 
+                m.name.toLowerCase().includes(search) || 
+                (m.description && m.description.toLowerCase().includes(search))
+            );
+
+            if (filtered.length > 0) {
+                grid.innerHTML = '';
+                filtered.forEach(med => {
+                    let stockClass = 'badge-success';
+                    let stockText = 'In Stock';
+                    
+                    const stockQty = parseInt(med.stock_quantity);
+                    if (stockQty <= 0) {
+                        stockClass = 'badge-danger';
+                        stockText = 'Out of Stock';
+                    } else if (stockQty <= 10) {
+                        stockClass = 'badge-warning';
+                        stockText = `Low (${stockQty})`;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = 'medicine-card';
+                    card.innerHTML = `
+                        <div class="card-img-wrapper">
+                            <img src="${med.image_path}" alt="${escapeHtml(med.name)}" onerror="this.src='default-medicine.svg'">
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">${escapeHtml(med.name)}</h3>
+                            <p class="card-desc">${escapeHtml(med.description || 'No detailed description available.')}</p>
+                            <div class="card-footer">
+                                <span class="price-tag">₹${parseFloat(med.price).toFixed(2)}</span>
+                                <span class="stock-badge ${stockClass}">${stockText}</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } else {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+                        <h3 style="margin-bottom:0.5rem; color: var(--text-main);">No medicines found</h3>
+                        ${search !== '' ? `
+                            <p style="margin-bottom: 1.5rem;">We couldn't find any medicines matching "<strong>${escapeHtml(search)}</strong>".</p>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="clearSearch()">Clear Search &amp; View All</button>
+                        ` : `
+                            <p>No medicines currently listed in catalog.</p>
+                        `}
+                    </div>
+                `;
+            }
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('publicSearchInput');
+            if (input) input.value = '';
+            filterAndRenderMedicines('');
         }
 
         function escapeHtml(str) {
