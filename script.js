@@ -1,5 +1,6 @@
 /**
- * Simple Unified JavaScript for PharmaCare (Flat structure, no subfolders)
+ * Simple Unified JavaScript for PharmaCare
+ * Handles all 4 pages: dashboard.html, medicines.html, pos.html, sales.html
  */
 
 let cart = [];
@@ -12,19 +13,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Set current date
     populateCurrentDate();
 
-    // 3. Initialize tabs
-    initTabs();
-
-    // 4. Initialize forms and loaders
+    // 3. Initialize forms and loaders
     initAddMedicineForm();
     initEditMedicineForm();
     initMedicineSearch();
     initPosCatalog();
     initCheckoutForm();
 
-    // 5. Initial loads
-    if (document.getElementById('overview-tab')) {
+    // 4. Load stored cart if available
+    const savedCart = sessionStorage.getItem('pharmacy_cart');
+    if (savedCart) {
+        try {
+            cart = JSON.parse(savedCart);
+        } catch(e) {}
+    }
+
+    // 5. Page-specific initial loads
+    if (document.getElementById('statSalesToday')) {
         loadDashboardStats();
+    }
+    if (document.getElementById('adminMedicineTableBody')) {
+        loadMedicinesList();
+    }
+    if (document.getElementById('posCatalogGrid')) {
+        loadPosCatalog();
+        renderCart();
+    }
+    if (document.getElementById('salesHistoryTableBody')) {
+        loadSalesHistory();
     }
 });
 
@@ -49,6 +65,7 @@ async function handleLogout(e) {
     try {
         await fetch('api.php?action=logout');
     } catch (err) {}
+    sessionStorage.removeItem('pharmacy_cart');
     window.location.href = 'login.html';
 }
 
@@ -66,43 +83,7 @@ function populateCurrentDate() {
 
 
 // ==========================================
-// 2. TAB SWITCHER
-// ==========================================
-
-function initTabs() {
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    if (!tabBtns.length) return;
-
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetTab = btn.getAttribute('data-tab');
-            switchTab(targetTab);
-        });
-    });
-}
-
-function switchTab(tabId) {
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
-    tabBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
-    });
-
-    tabPanes.forEach(pane => {
-        pane.classList.toggle('active', pane.id === tabId);
-    });
-
-    if (tabId === 'overview-tab') loadDashboardStats();
-    if (tabId === 'medicines-tab') loadMedicinesList();
-    if (tabId === 'pos-tab') loadPosCatalog();
-    if (tabId === 'sales-tab') loadSalesHistory();
-}
-
-
-// ==========================================
-// 3. DASHBOARD STATS & OVERVIEW
+// 2. DASHBOARD STATS (dashboard.html)
 // ==========================================
 
 async function loadDashboardStats() {
@@ -197,7 +178,7 @@ async function loadDashboardStats() {
 
 
 // ==========================================
-// 4. MEDICINE MANAGEMENT (List, Add, Edit, Delete)
+// 3. MEDICINE MANAGEMENT (medicines.html)
 // ==========================================
 
 function initMedicineSearch() {
@@ -231,7 +212,6 @@ function initAddMedicineForm() {
                 form.reset();
                 closeModal('addMedicineModal');
                 loadMedicinesList();
-                loadDashboardStats();
             } else {
                 showToast(result.message || 'Failed to add medicine', 'error');
             }
@@ -257,7 +237,6 @@ function initEditMedicineForm() {
                 showToast(result.message, 'success');
                 closeModal('editMedicineModal');
                 loadMedicinesList();
-                loadDashboardStats();
             } else {
                 showToast(result.message || 'Failed to update medicine', 'error');
             }
@@ -349,7 +328,6 @@ async function deleteMedicine(id, name) {
         if (result.success) {
             showToast('Medicine deleted successfully', 'success');
             loadMedicinesList();
-            loadDashboardStats();
         } else {
             showToast(result.message || 'Failed to delete', 'error');
         }
@@ -360,7 +338,7 @@ async function deleteMedicine(id, name) {
 
 
 // ==========================================
-// 5. POS & BILLING (Catalog, Cart, Checkout)
+// 4. POS & BILLING (pos.html)
 // ==========================================
 
 function initPosCatalog() {
@@ -467,6 +445,7 @@ function addToCart(med) {
         });
     }
 
+    sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
     renderCart();
 }
 
@@ -477,7 +456,7 @@ function addPosItemDirect(id, name, price, stock) {
         price: parseFloat(price),
         stock_quantity: parseInt(stock)
     });
-    switchTab('pos-tab');
+    window.location.href = 'pos.html';
 }
 
 function renderCart() {
@@ -489,7 +468,7 @@ function renderCart() {
     if (badge) badge.textContent = `${cart.length} item(s)`;
 
     if (cart.length === 0) {
-        cartContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">No items in cart. Click medicines to add.</div>';
+        cartContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">No items in cart. Click medicines on the left to add.</div>';
         if (totalElem) totalElem.textContent = '₹0.00';
         return;
     }
@@ -514,10 +493,10 @@ function renderCart() {
                 <div style="font-size:0.8rem; color:var(--text-muted);">₹${item.price.toFixed(2)} x ${item.quantity} = ₹${itemTotal.toFixed(2)}</div>
             </div>
             <div style="display:flex; align-items:center; gap:0.4rem;">
-                <button class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, -1)" style="padding:0.2rem 0.5rem;">-</button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, -1)" style="padding:0.2rem 0.5rem;">-</button>
                 <span style="font-weight:600; min-width:20px; text-align:center;">${item.quantity}</span>
-                <button class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, 1)" style="padding:0.2rem 0.5rem;">+</button>
-                <button class="btn btn-sm btn-danger" onclick="removeFromCart(${index})" style="padding:0.2rem 0.5rem;">&times;</button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, 1)" style="padding:0.2rem 0.5rem;">+</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})" style="padding:0.2rem 0.5rem;">&times;</button>
             </div>
         `;
         cartContainer.appendChild(row);
@@ -540,16 +519,19 @@ function updateCartQty(index, change) {
         return;
     }
     item.quantity = newQty;
+    sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
     renderCart();
 }
 
 function removeFromCart(index) {
     cart.splice(index, 1);
+    sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
     renderCart();
 }
 
 function clearCart() {
     cart = [];
+    sessionStorage.removeItem('pharmacy_cart');
     renderCart();
 }
 
@@ -589,11 +571,9 @@ function initCheckoutForm() {
             const result = await res.json();
             if (result.success) {
                 showToast('Sale completed successfully!', 'success');
-                cart = [];
-                renderCart();
+                clearCart();
                 form.reset();
                 loadPosCatalog();
-                loadDashboardStats();
             } else {
                 showToast(result.message || 'Checkout failed', 'error');
             }
@@ -605,7 +585,7 @@ function initCheckoutForm() {
 
 
 // ==========================================
-// 6. SALES HISTORY & DETAILS
+// 5. SALES HISTORY (sales.html)
 // ==========================================
 
 async function loadSalesHistory() {
@@ -680,7 +660,7 @@ async function viewSaleDetails(saleId) {
 
 
 // ==========================================
-// 7. UTILITIES (Toast, Modals, Escaping)
+// 6. UTILITIES (Toast, Modals, Escaping)
 // ==========================================
 
 function showToast(message, type = 'info') {

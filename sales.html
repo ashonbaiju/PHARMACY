@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales History - PharmaCare</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="app-header">
+        <div class="container navbar">
+            <a href="dashboard.html" class="brand">
+                <div class="brand-icon">P</div>
+                <div class="brand-text">
+                    <h1>PharmaCare</h1>
+                    <p>Pharmacy Management Panel</p>
+                </div>
+            </a>
+            <div class="nav-actions">
+                <a href="index.html" class="btn btn-secondary btn-sm" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Storefront
+                </a>
+                <a href="#" onclick="handleLogout(event)" class="btn btn-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container dashboard-container">
+        
+        <!-- Greeting Banner -->
+        <div class="greeting-banner">
+            <div class="greeting-text">
+                <h2>Sales History &amp; Orders</h2>
+                <p>Complete archive of past billing transactions and customer order receipts.</p>
+            </div>
+            <div class="greeting-actions">
+                <span class="date-pill" id="currentDatePill">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Loading Date...
+                </span>
+                <button class="btn btn-secondary btn-sm" onclick="loadSalesHistory()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    Refresh List
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Bar for Pages -->
+        <nav class="tab-nav">
+            <a href="dashboard.html" class="tab-btn">Dashboard Overview</a>
+            <a href="medicines.html" class="tab-btn">Medicine Management</a>
+            <a href="pos.html" class="tab-btn">Billing &amp; POS</a>
+            <a href="sales.html" class="tab-btn active">Sales History</a>
+        </nav>
+
+        <!-- SALES HISTORY TABLE PANEL -->
+        <div class="panel" style="margin-bottom: 0;">
+            <div class="panel-header">
+                <h3>All Completed Transactions</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Date &amp; Time</th>
+                            <th>Customer Name</th>
+                            <th>Customer Phone</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesHistoryTableBody">
+                        <tr><td colspan="6" class="text-center">Loading sales history...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Sale Details Modal -->
+    <div id="saleDetailsModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3 id="modalInvoiceTitle">Invoice Details</h3>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('saleDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalCustomerInfo" style="margin-bottom: 1.25rem; font-size: 0.9rem; background: var(--surface-alt); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border);"></div>
+                <div class="table-responsive">
+                    <table class="table" style="font-size: 0.88rem;">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalItemsBody"></tbody>
+                    </table>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1.25rem; font-size: 1.15rem; font-weight:700;">
+                    <span>Grand Total:</span>
+                    <span id="modalGrandTotal" class="price-tag" style="font-size:1.35rem;">₹0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script src="script.js"></script>
+</body>
+</html>

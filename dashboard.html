@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management Panel - PharmaCare</title>
+    <title>Dashboard Overview - PharmaCare</title>
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js CDN for Analytics Graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- jsPDF CDN for POS Receipt PDF Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -35,7 +33,7 @@
     <!-- Main Dashboard Container -->
     <main class="container dashboard-container">
         
-        <!-- Minimalist Greeting Banner & Quick Actions -->
+        <!-- Greeting Banner & Quick Actions -->
         <div class="greeting-banner">
             <div class="greeting-text">
                 <h2>Pharmacy Overview</h2>
@@ -46,27 +44,25 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     Loading Date...
                 </span>
-                <button class="btn btn-primary btn-sm" onclick="switchTab('pos-tab')">
+                <a href="pos.html" class="btn btn-primary btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     New POS Order
-                </button>
+                </a>
             </div>
         </div>
 
-        <!-- SPA Tab Switcher Bar -->
+        <!-- Navigation Bar for Pages -->
         <nav class="tab-nav">
-            <button class="tab-btn active" data-tab="overview-tab">Dashboard Overview</button>
-            <button class="tab-btn" data-tab="medicines-tab">Medicine Management</button>
-            <button class="tab-btn" data-tab="pos-tab">Billing &amp; POS</button>
-            <button class="tab-btn" data-tab="sales-tab">Sales History</button>
+            <a href="dashboard.html" class="tab-btn active">Dashboard Overview</a>
+            <a href="medicines.html" class="tab-btn">Medicine Management</a>
+            <a href="pos.html" class="tab-btn">Billing &amp; POS</a>
+            <a href="sales.html" class="tab-btn">Sales History</a>
         </nav>
 
-        <!-- ===================================================================
-             TAB 0: OVERVIEW & ALERTS
-             =================================================================== -->
-        <div id="overview-tab" class="tab-pane active">
+        <!-- DASHBOARD OVERVIEW CONTENT -->
+        <div id="overview-content">
             
-            <!-- Unified Executive Horizontal Metric Strip (Non-Boxed Layout) -->
+            <!-- Metric Strip -->
             <div class="metrics-strip">
                 <div class="metric-strip-item">
                     <div class="strip-item-header">
@@ -104,44 +100,63 @@
                 <div class="metric-strip-item">
                     <div class="strip-item-header">
                         <span class="strip-item-title">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                            Stock Alerts
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            Low Stock Alerts
                         </span>
-                        <span id="statStockTrend" class="strip-badge trend-alert">Restock</span>
+                        <span class="strip-badge trend-alert" id="statLowStockBadge">Needs Attention</span>
                     </div>
                     <div class="strip-item-value" id="statLowStockCount">0</div>
                 </div>
             </div>
 
-            <!-- MAIN ANALYTICAL SECTION: Simple Revenue Line Graph (100% Full-Width) -->
-            <div class="overview-analytics-grid" style="grid-template-columns: 1fr;">
-                
-                <!-- Simple 7-Day Revenue Line Graph Panel -->
-                <div class="panel" style="margin-bottom:0;">
-                    <div class="panel-header">
-                        <div>
-                            <h3>Sales &amp; Revenue Analytics Report</h3>
-                            <p style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.15rem;">Daily revenue performance overview (Last 7 Days)</p>
+            <!-- Health Status Breakdown -->
+            <div class="panel" style="margin-bottom: 2rem;">
+                <div class="panel-header">
+                    <h3>Inventory Stock Status</h3>
+                    <a href="medicines.html" class="btn btn-sm btn-secondary">Manage All</a>
+                </div>
+                <div class="health-breakdown-grid">
+                    <div class="health-item">
+                        <div class="health-label">
+                            <span class="status-dot green"></span>
+                            <span>Optimal Stock (&gt;10 units)</span>
+                            <strong id="healthyStockPercent" style="margin-left: auto;">0%</strong>
                         </div>
-                        <span class="user-badge" style="background:var(--primary-light); color:var(--primary); border-color:var(--primary-border);">
-                            Currency: ₹ (INR)
-                        </span>
+                        <div class="progress-track">
+                            <div class="progress-bar green" id="healthyStockBar" style="width: 0%;"></div>
+                        </div>
                     </div>
-                    <div style="position: relative; height: 300px; width: 100%;">
-                        <canvas id="salesAnalyticsChart"></canvas>
+                    <div class="health-item">
+                        <div class="health-label">
+                            <span class="status-dot yellow"></span>
+                            <span>Low Stock (&le;10 units)</span>
+                            <strong id="lowStockPercent" style="margin-left: auto;">0%</strong>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar yellow" id="lowStockBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="health-item">
+                        <div class="health-label">
+                            <span class="status-dot red"></span>
+                            <span>Out of Stock (0 units)</span>
+                            <strong id="outOfStockPercent" style="margin-left: auto;">0%</strong>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar red" id="outOfStockBar" style="width: 0%;"></div>
+                        </div>
                     </div>
                 </div>
-
             </div>
 
-            <!-- SUB SECTION: Recent Transactions (50%) + Low Stock Alerts (50%) -->
-            <div class="dashboard-grid" style="margin-top: 1.75rem;">
+            <!-- Two-Column Overview: Recent Sales & Low Stock Alerts -->
+            <div class="overview-grid-2">
                 
                 <!-- Recent Sales Transactions Panel -->
                 <div class="panel" style="margin-bottom:0;">
                     <div class="panel-header">
-                        <h3>Recent Sales Transactions</h3>
-                        <button class="btn btn-sm btn-secondary" onclick="switchTab('sales-tab')">View All</button>
+                        <h3>Recent Sales</h3>
+                        <a href="sales.html" class="btn btn-sm btn-secondary">View All</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table">
@@ -164,7 +179,7 @@
                 <div class="panel" style="margin-bottom:0;">
                     <div class="panel-header">
                         <h3>Low Stock Alerts</h3>
-                        <button class="btn btn-sm btn-secondary" onclick="switchTab('medicines-tab')">Restock</button>
+                        <a href="medicines.html" class="btn btn-sm btn-secondary">Restock</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table">
@@ -185,287 +200,39 @@
             </div>
         </div>
 
-        <!-- ===================================================================
-             TAB 1: MEDICINE MANAGEMENT (Current Medicine Catalog)
-             =================================================================== -->
-        <div id="medicines-tab" class="tab-pane">
-            <div class="panel" style="margin-bottom: 0;">
-                <div class="panel-header" style="flex-wrap: wrap; gap: 0.75rem;">
-                    <h3>Medicine Inventory</h3>
-                    <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto;">
-                        <input type="text" id="adminMedicineSearch" class="form-control" placeholder="Search medicines..." style="max-width: 200px; padding: 0.4rem 0.85rem; font-size: 0.8rem; height: 32px; border-radius: var(--radius-sm);">
-                        <button class="btn btn-sm btn-primary" onclick="openModal('addMedicineModal')" style="height: 32px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            Add Medicine
-                        </button>
-                        <button class="btn btn-sm btn-secondary" onclick="loadMedicinesList()" style="height: 32px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                            Refresh
-                        </button>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Medicine</th>
-                                <th>Description</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Expiry Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminMedicineTableBody">
-                            <tr><td colspan="6" class="text-center">Loading inventory data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===================================================================
-             TAB 2: BILLING & POS (POINT OF SALE)
-             =================================================================== -->
-        <div id="pos-tab" class="tab-pane">
-            <div class="pos-billing-grid">
-                
-                <!-- Left Column: Quick Select Product Catalog Grid -->
-                <div class="panel" style="margin-bottom: 0;">
-                    <div class="panel-header" style="flex-wrap: wrap; gap: 0.75rem;">
-                        <h3>Quick Select Catalog</h3>
-                        <input type="text" id="posCatalogSearch" class="form-control" placeholder="Search products..." style="max-width: 200px; padding: 0.4rem 0.85rem; font-size: 0.8rem; height: 32px; border-radius: var(--radius-sm);">
-                    </div>
-                    
-                    <!-- Dynamic Grid -->
-                    <div id="posCatalogGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.85rem; max-height: 480px; overflow-y: auto; padding-right: 4px; margin-top: 1rem;">
-                        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 4rem 0;">Loading catalog items...</div>
-                    </div>
-                </div>
-
-                <!-- Right Column: Active Cart & Checkout Invoice Sidebar -->
-                <div class="panel" style="margin-bottom: 0; min-height: 520px; display: flex; flex-direction: column;">
-                    <div class="panel-header">
-                        <h3>Active Invoice</h3>
-                        <button type="button" class="btn btn-sm btn-secondary" onclick="clearCart()">Clear All</button>
-                    </div>
-
-                    <!-- Cart items list -->
-                    <div class="table-responsive" style="flex-grow: 1; max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 1.25rem; background: var(--bg);">
-                        <table class="table" style="font-size: 0.8rem;">
-                            <thead>
-                                <tr>
-                                    <th>Medicine</th>
-                                    <th>Qty</th>
-                                    <th>Total</th>
-                                    <th style="width: 30px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="posCartTableBody">
-                                <tr><td colspan="4" class="text-center" style="color:var(--text-muted); padding:2rem 1rem;">No items selected. Click catalog products to add.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Customer Details Entry -->
-                    <div style="background: var(--surface-alt); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 1.25rem;">
-                        <div class="form-group" style="margin-bottom: 0.75rem;">
-                            <label class="form-label" for="customerName" style="font-size: 0.7rem; margin-bottom: 0.25rem;">Customer Name *</label>
-                            <input type="text" id="customerName" class="form-control" placeholder="e.g. John Doe" style="padding: 0.45rem 0.65rem; font-size: 0.8rem; height: 32px;">
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label class="form-label" for="customerPhone" style="font-size: 0.7rem; margin-bottom: 0.25rem;">Phone Number *</label>
-                            <input type="tel" id="customerPhone" class="form-control mono" placeholder="e.g. +91 98765 43210" style="padding: 0.45rem 0.65rem; font-size: 0.8rem; height: 32px;">
-                        </div>
-                    </div>
-
-                    <!-- Summary & Pay Trigger -->
-                    <div class="cart-summary" style="margin-top: auto; padding-top: 0.85rem; border-top: 2px dashed var(--border);">
-                        <div class="summary-row" style="font-size: 0.85rem;">
-                            <span>Subtotal</span>
-                            <span id="posSubtotal" class="mono">₹0.00</span>
-                        </div>
-                        <div class="summary-row total" style="margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid var(--border);">
-                            <span>Total Due</span>
-                            <span id="posTotalAmount" class="mono" style="font-size: 1.35rem; color: var(--primary);">₹0.00</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
-                            <button type="button" id="checkoutBtn" class="btn btn-primary btn-block" style="padding: 0.7rem; font-size: 0.85rem;">
-                                Complete Sale &amp; Save PDF
-                            </button>
-                            <button type="button" id="checkoutPrintBtn" class="btn btn-secondary btn-block" style="padding: 0.7rem; font-size: 0.85rem; background: var(--success-light); border-color: var(--success-border); color: var(--success); display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                                Complete Sale &amp; Direct Print
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- ===================================================================
-             TAB 3: SALES HISTORY
-             =================================================================== -->
-        <div id="sales-tab" class="tab-pane">
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>Transaction &amp; Sales History</h3>
-                    <button class="btn btn-sm btn-secondary" onclick="loadSalesHistory()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                        Refresh History
-                    </button>
-                </div>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Invoice ID</th>
-                                <th>Date &amp; Time</th>
-                                <th>Customer Name</th>
-                                <th>Phone Number</th>
-                                <th>Total Amount</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="salesHistoryTableBody">
-                            <tr><td colspan="6" class="text-center">Loading sales records...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
     </main>
 
-    <!-- Modal for Invoice Line Item Breakdown -->
+    <!-- Invoice Details Modal -->
     <div id="saleDetailsModal" class="modal-overlay">
-        <div class="modal-card">
+        <div class="modal-card" style="max-width: 580px;">
             <div class="modal-header">
                 <h3 id="modalInvoiceTitle">Invoice Details</h3>
                 <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('saleDetailsModal')">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="modalCustomerInfo" style="margin-bottom:1rem; padding:0.75rem; background:var(--surface-alt); border-radius:var(--radius-sm); font-size:0.84rem;"></div>
-                
+                <div id="modalCustomerInfo" style="margin-bottom: 1.25rem; font-size: 0.9rem; background: var(--surface-alt); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border);"></div>
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table" style="font-size: 0.88rem;">
                         <thead>
                             <tr>
-                                <th>Item Name</th>
+                                <th>Medicine</th>
                                 <th>Qty</th>
-                                <th>Unit Price</th>
+                                <th>Price</th>
                                 <th>Total</th>
                             </tr>
                         </thead>
                         <tbody id="modalItemsBody"></tbody>
                     </table>
                 </div>
-
-                <div style="text-align:right; margin-top:1rem; font-size:1.1rem; font-weight:700;">
-                    Total Paid: <span id="modalGrandTotal" class="price-tag mono">₹0.00</span>
-                </div>
-            </div>
-            <div class="modal-footer" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                <button type="button" id="modalPrintBtn" class="btn btn-primary btn-sm" style="background: var(--success-light); border-color: var(--success-border); color: var(--success); display: inline-flex; align-items: center; gap: 0.35rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                    Print Invoice
-                </button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('saleDetailsModal')">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for Adding Medicine (Manual Add Console) -->
-    <div id="addMedicineModal" class="modal-overlay">
-        <div class="modal-card" style="max-width: 480px;">
-            <div class="modal-header">
-                <h3 id="medicineConsoleTitle">Add New Medicine</h3>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('addMedicineModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="medicineManualContainer">
-                    <form id="addMedicineForm" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label class="form-label" for="medName">Medicine Name *</label>
-                            <input type="text" id="medName" name="name" class="form-control" placeholder="e.g. Paracetamol 500mg" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="medDesc">Description</label>
-                            <textarea id="medDesc" name="description" class="form-control" placeholder="Key therapeutic uses, dosage info..."></textarea>
-                        </div>
-                        <div class="form-row-2">
-                            <div class="form-group">
-                                <label class="form-label" for="medPrice">Price (₹) *</label>
-                                <input type="number" step="0.01" id="medPrice" name="price" class="form-control mono" placeholder="0.00" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="medStock">Initial Stock *</label>
-                                <input type="number" id="medStock" name="stock_quantity" class="form-control mono" placeholder="100" required>
-                            </div>
-                        </div>
-                        <div class="form-row-2">
-                            <div class="form-group">
-                                <label class="form-label" for="medExpiry">Expiry Date *</label>
-                                <input type="date" id="medExpiry" name="expiry_date" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="medImage">Image File</label>
-                                <input type="file" id="medImage" name="image" class="form-control" accept="image/*">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">Save Medicine</button>
-                    </form>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1.25rem; font-size: 1.15rem; font-weight:700;">
+                    <span>Grand Total:</span>
+                    <span id="modalGrandTotal" class="price-tag" style="font-size:1.35rem;">₹0.00</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Edit Medicine Modal -->
-    <div id="editMedicineModal" class="modal-overlay">
-        <div class="modal-card" style="max-width: 480px;">
-            <div class="modal-header">
-                <h3>Edit Medicine</h3>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('editMedicineModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="editMedicineForm" enctype="multipart/form-data">
-                    <input type="hidden" id="editMedId" name="id">
-                    <div class="form-group">
-                        <label class="form-label" for="editMedName">Medicine Name *</label>
-                        <input type="text" id="editMedName" name="name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="editMedDesc">Description</label>
-                        <textarea id="editMedDesc" name="description" class="form-control" placeholder="Key therapeutic uses, dosage info..."></textarea>
-                    </div>
-                    <div class="form-row-2">
-                        <div class="form-group">
-                            <label class="form-label" for="editMedPrice">Price (₹) *</label>
-                            <input type="number" step="0.01" id="editMedPrice" name="price" class="form-control mono" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="editMedStock">Stock Count *</label>
-                            <input type="number" id="editMedStock" name="stock_quantity" class="form-control mono" required>
-                        </div>
-                    </div>
-                    <div class="form-row-2">
-                        <div class="form-group">
-                            <label class="form-label" for="editMedExpiry">Expiry Date *</label>
-                            <input type="date" id="editMedExpiry" name="expiry_date" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="editMedImage">Change Image</label>
-                            <input type="file" id="editMedImage" name="image" class="form-control" accept="image/*">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">Update Medicine</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Single Unified Script -->
+    <!-- Script -->
     <script src="script.js"></script>
 </body>
 </html>

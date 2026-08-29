@@ -528,6 +528,7 @@ textarea.form-control {
   align-items: center;
   gap: 0.45rem;
   flex-shrink: 0;
+  text-decoration: none;
 }
 
 .tab-btn:hover {
