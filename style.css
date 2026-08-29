@@ -387,50 +387,60 @@ a:hover {
   }
 }
 
-/* Storefront Products */
-.hero-section {
-  padding: 2.5rem 0 2rem;
-  text-align: center;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 2rem;
-}
-
-.hero-title {
-  font-size: 1.85rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-}
-
-.hero-subtitle {
-  color: var(--text-muted);
-  margin-bottom: 1.5rem;
-}
-
-.search-bar-wrap {
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-.product-grid {
+/* Storefront & Medicine Cards Grid */
+.medicine-grid, .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 1.25rem;
 }
 
-.product-card {
+.medicine-card, .product-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.product-card img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
+.medicine-card:hover, .product-card:hover {
+  border-color: #cbd5e1;
+}
+
+.card-img-wrapper {
+  text-align: center;
   margin-bottom: 0.75rem;
+}
+
+.card-img-wrapper img, .product-card img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.card-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
 }
 
 /* Login Auth Portal */

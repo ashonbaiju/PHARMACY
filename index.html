@@ -10,35 +10,36 @@
 
     <!-- Header Navigation -->
     <header class="app-header">
-        <div class="container navbar" style="justify-content: flex-end;">
+        <div class="container navbar">
+            <span style="font-weight: 700; font-size: 1.05rem;">PharmaCare</span>
             <div class="nav-actions" id="navActions">
                 <span style="color:var(--text-muted); font-size:0.85rem;">Loading...</span>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <span style="display:inline-block; padding:0.3rem 0.85rem; font-size:0.75rem; font-weight:700; color:var(--primary); background:var(--primary-light); border:1px solid var(--primary-border); border-radius:30px; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.04em;">
-                Live Storefront Inventory
-            </span>
-            <h2>Authentic Healthcare &amp; Medicines</h2>
-            <p>Explore our real-time pharmaceutical catalog and check product availability.</p>
-            <form action="index.html" method="GET" class="storefront-search-form">
-                <input type="text" name="search" id="publicSearchInput" placeholder="Search medicines by name or keyword..." style="flex-grow: 1; border: none; padding: 0.85rem 1.4rem; font-size: 0.95rem; outline: none; background: transparent; font-family: inherit;">
-                <button type="submit" class="btn btn-primary" style="border-radius: 0; padding: 0 1.8rem; font-size: 0.92rem; height: auto; border: none; margin: 0;">Search</button>
+    <!-- Main Container -->
+    <main class="container dashboard-container" style="flex-grow: 1;">
+        
+        <!-- Greeting & Search Banner -->
+        <div class="greeting-banner" style="flex-wrap: wrap; gap: 1rem;">
+            <div class="greeting-text">
+                <h2>Medicine Catalog</h2>
+                <p>Explore our healthcare medicines and check live stock availability.</p>
+            </div>
+            <form action="index.html" method="GET" style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" name="search" id="publicSearchInput" class="form-control" placeholder="Search medicines..." style="max-width: 240px; height: 36px;">
+                <button type="submit" class="btn btn-primary" style="height: 36px; white-space: nowrap;">Search</button>
             </form>
         </div>
-    </section>
 
-    <!-- Main Content Catalog -->
-    <main class="container" style="flex-grow: 1;">
+        <!-- Medicine Cards Grid -->
         <div class="medicine-grid" id="publicMedicineGrid">
             <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
                 <h3>Loading catalog medicines...</h3>
             </div>
         </div>
+
     </main>
 
     <!-- Storefront Script Logic -->
