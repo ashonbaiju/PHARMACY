@@ -236,7 +236,12 @@ switch ($action) {
         $lowStockItems = $lowItemsStmt->fetchAll();
 
         // Sales today
-        $todayStmt = $pdo->prepare("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sales WHERE DATE(sale_date) = :today");
+        $today = date('Y-m-d');
+        $todayStmt = $pdo->prepare("
+            SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total 
+            FROM sales 
+            WHERE DATE(sale_date) = CURDATE() OR DATE(sale_date) = :today
+        ");
         $todayStmt->execute(['today' => $today]);
         $todayStats = $todayStmt->fetch();
 

@@ -545,6 +545,37 @@ function initCheckoutForm() {
             const result = await res.json();
             if (result.success) {
                 showToast('Sale completed successfully!', 'success');
+                
+                // Show invoice receipt modal
+                const data = result.data;
+                const titleElem = document.getElementById('receiptInvoiceTitle');
+                const metaElem = document.getElementById('receiptInvoiceMeta');
+                const custElem = document.getElementById('receiptCustomerInfo');
+                const itemsBody = document.getElementById('receiptItemsBody');
+                const grandTotalElem = document.getElementById('receiptGrandTotal');
+
+                if (titleElem) titleElem.textContent = `Invoice Receipt (#INV-${data.sale_id})`;
+                if (metaElem) metaElem.textContent = `Invoice: INV-${data.sale_id} | Date: ${data.sale_date}`;
+                if (custElem) custElem.innerHTML = `<div><strong>Customer:</strong> ${escapeHtml(data.customer_name)}</div><div><strong>Phone:</strong> ${escapeHtml(data.customer_phone)}</div>`;
+
+                if (itemsBody) {
+                    itemsBody.innerHTML = '';
+                    (data.items || []).forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${escapeHtml(item.name)}</td>
+                            <td>${item.quantity}</td>
+                            <td>₹${parseFloat(item.price_at_time).toFixed(2)}</td>
+                            <td>₹${parseFloat(item.total).toFixed(2)}</td>
+                        `;
+                        itemsBody.appendChild(tr);
+                    });
+                }
+
+                if (grandTotalElem) grandTotalElem.textContent = `₹${parseFloat(data.total_amount).toFixed(2)}`;
+
+                openModal('invoiceReceiptModal');
+
                 clearCart();
                 form.reset();
                 loadPosCatalog();
@@ -555,6 +586,26 @@ function initCheckoutForm() {
             showToast('Error during checkout', 'error');
         }
     });
+}
+
+function printReceipt() {
+    const printContent = document.getElementById('invoicePrintArea');
+    if (!printContent) {
+        window.print();
+        return;
+    }
+    const win = window.open('', '', 'height=650,width=500');
+    win.document.write('<html><head><title>Invoice Receipt - PharmaCare</title>');
+    win.document.write('<style>body{font-family:sans-serif;padding:20px;font-size:14px;color:#1e293b;} table{width:100%;border-collapse:collapse;margin:15px 0;} th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left;} th{background:#f1f5f9;color:#64748b;} .price-tag{color:#0284c7;font-weight:bold;}</style>');
+    win.document.write('</head><body>');
+    win.document.write(printContent.innerHTML);
+    win.document.write('</body></html>');
+    win.document.close();
+    win.focus();
+    setTimeout(() => {
+        win.print();
+        win.close();
+    }, 250);
 }
 
 
