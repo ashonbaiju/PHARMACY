@@ -471,25 +471,63 @@ function renderCart() {
             <div style="flex:1; padding-right: 0.5rem;">
                 <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; margin-bottom: 0.2rem;">
                     <strong>${item.name}</strong>
-                    <select onchange="updateCartUnit(${index}, this.value)" class="form-control" style="width:auto; padding:0.1rem 0.35rem; font-size:0.75rem; height:24px; border-radius:4px; display:inline-block; font-weight:600; cursor:pointer;">
+                    <select onchange="updateCartUnit(${index}, this.value)" class="form-control" style="width:auto; padding:0.1rem 0.35rem; font-size:0.75rem; height:26px; border-radius:4px; display:inline-block; font-weight:600; cursor:pointer;">
                         <option value="piece" ${item.unit_type === 'piece' ? 'selected' : ''}>Piece (1x)</option>
                         <option value="strip" ${item.unit_type === 'strip' ? 'selected' : ''}>Strip (10x)</option>
                     </select>
                 </div>
-                <div style="font-size:0.8rem; color:var(--text-muted);">
+                <div id="cartItemText_${index}" style="font-size:0.8rem; color:var(--text-muted);">
                     ₹${unitPrice.toFixed(2)} × ${item.quantity} ${item.unit_type === 'strip' ? 'strip(s)' : 'pc(s)'} = <strong>₹${itemTotal.toFixed(2)}</strong>
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:0.35rem;">
-                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, -1)" style="padding:0.2rem 0.5rem; height:28px;">-</button>
-                <span style="font-weight:600; min-width:22px; text-align:center; font-size:0.9rem;">${item.quantity}</span>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, 1)" style="padding:0.2rem 0.5rem; height:28px;">+</button>
-                <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})" style="padding:0.2rem 0.5rem; height:28px;">&times;</button>
+            <div style="display:flex; align-items:center; gap:0.3rem;">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, -1)" style="padding:0.2rem 0.45rem; height:28px; width:28px;">-</button>
+                <input type="number" min="1" value="${item.quantity}" oninput="setCartDirectQty(${index}, this.value)" onchange="renderCart()" class="form-control mono" style="width: 52px; height: 28px; padding: 0.2rem 0.25rem; text-align: center; font-size: 0.88rem; font-weight: 700; border-radius: 4px;">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, 1)" style="padding:0.2rem 0.45rem; height:28px; width:28px;">+</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})" style="padding:0.2rem 0.45rem; height:28px; width:28px;">&times;</button>
             </div>
         `;
         cartContainer.appendChild(row);
     });
 
+    if (totalElem) totalElem.textContent = `₹${grandTotal.toFixed(2)}`;
+}
+
+function setCartDirectQty(index, rawVal) {
+    const item = cart[index];
+    if (!item) return;
+
+    let val = parseInt(rawVal);
+    if (isNaN(val) || val <= 0) {
+        val = 1;
+    }
+
+    const multiplier = item.unit_type === 'strip' ? 10 : 1;
+    const requiredPcs = val * multiplier;
+
+    if (requiredPcs > item.stock_quantity) {
+        val = Math.max(1, Math.floor(item.stock_quantity / multiplier));
+        showToast(`Cannot exceed available stock (${item.stock_quantity} pcs). Set to ${val}.`, 'warning');
+    }
+
+    item.quantity = val;
+    sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
+
+    // Update line total text
+    const textElem = document.getElementById(`cartItemText_${index}`);
+    const unitPrice = item.price * multiplier;
+    const itemTotal = unitPrice * item.quantity;
+    if (textElem) {
+        textElem.innerHTML = `₹${unitPrice.toFixed(2)} × ${item.quantity} ${item.unit_type === 'strip' ? 'strip(s)' : 'pc(s)'} = <strong>₹${itemTotal.toFixed(2)}</strong>`;
+    }
+
+    // Update grand total
+    const totalElem = document.getElementById('posCartGrandTotal');
+    let grandTotal = 0;
+    cart.forEach(it => {
+        const mult = it.unit_type === 'strip' ? 10 : 1;
+        grandTotal += (it.price * mult) * it.quantity;
+    });
     if (totalElem) totalElem.textContent = `₹${grandTotal.toFixed(2)}`;
 }
 
