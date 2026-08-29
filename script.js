@@ -404,17 +404,20 @@ function addToCart(med) {
 
     const existing = cart.find(item => item.medicine_id === med.medicine_id);
     if (existing) {
-        if (existing.quantity + 1 > med.stock_quantity) {
-            showToast(`Only ${med.stock_quantity} units available in stock.`, 'error');
+        const nextQty = existing.quantity + 1;
+        const requiredPcs = existing.unit_type === 'strip' ? nextQty * 10 : nextQty;
+        if (requiredPcs > med.stock_quantity) {
+            showToast(`Only ${med.stock_quantity} pieces available in stock.`, 'error');
             return;
         }
-        existing.quantity += 1;
+        existing.quantity = nextQty;
     } else {
         cart.push({
             medicine_id: med.medicine_id,
             name: med.name,
             price: med.price,
             stock_quantity: med.stock_quantity,
+            unit_type: 'piece',
             quantity: 1
         });
     }
@@ -451,32 +454,66 @@ function renderCart() {
     let grandTotal = 0;
 
     cart.forEach((item, index) => {
-        const itemTotal = item.price * item.quantity;
+        item.unit_type = item.unit_type || 'piece';
+        const unitMultiplier = item.unit_type === 'strip' ? 10 : 1;
+        const unitPrice = item.price * unitMultiplier;
+        const itemTotal = unitPrice * item.quantity;
         grandTotal += itemTotal;
 
         const row = document.createElement('div');
         row.style.display = 'flex';
         row.style.alignItems = 'center';
         row.style.justifyContent = 'space-between';
-        row.style.padding = '0.6rem 0';
+        row.style.padding = '0.65rem 0';
         row.style.borderBottom = '1px solid var(--border)';
 
         row.innerHTML = `
-            <div style="flex:1;">
-                <strong>${item.name}</strong>
-                <div style="font-size:0.8rem; color:var(--text-muted);">₹${item.price.toFixed(2)} x ${item.quantity} = ₹${itemTotal.toFixed(2)}</div>
+            <div style="flex:1; padding-right: 0.5rem;">
+                <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; margin-bottom: 0.2rem;">
+                    <strong>${item.name}</strong>
+                    <select onchange="updateCartUnit(${index}, this.value)" class="form-control" style="width:auto; padding:0.1rem 0.35rem; font-size:0.75rem; height:24px; border-radius:4px; display:inline-block; font-weight:600; cursor:pointer;">
+                        <option value="piece" ${item.unit_type === 'piece' ? 'selected' : ''}>Piece (1x)</option>
+                        <option value="strip" ${item.unit_type === 'strip' ? 'selected' : ''}>Strip (10x)</option>
+                    </select>
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">
+                    ₹${unitPrice.toFixed(2)} × ${item.quantity} ${item.unit_type === 'strip' ? 'strip(s)' : 'pc(s)'} = <strong>₹${itemTotal.toFixed(2)}</strong>
+                </div>
             </div>
-            <div style="display:flex; align-items:center; gap:0.4rem;">
-                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, -1)" style="padding:0.2rem 0.5rem;">-</button>
-                <span style="font-weight:600; min-width:20px; text-align:center;">${item.quantity}</span>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, 1)" style="padding:0.2rem 0.5rem;">+</button>
-                <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})" style="padding:0.2rem 0.5rem;">&times;</button>
+            <div style="display:flex; align-items:center; gap:0.35rem;">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, -1)" style="padding:0.2rem 0.5rem; height:28px;">-</button>
+                <span style="font-weight:600; min-width:22px; text-align:center; font-size:0.9rem;">${item.quantity}</span>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, 1)" style="padding:0.2rem 0.5rem; height:28px;">+</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})" style="padding:0.2rem 0.5rem; height:28px;">&times;</button>
             </div>
         `;
         cartContainer.appendChild(row);
     });
 
     if (totalElem) totalElem.textContent = `₹${grandTotal.toFixed(2)}`;
+}
+
+function updateCartUnit(index, unitType) {
+    const item = cart[index];
+    if (!item) return;
+
+    item.unit_type = unitType;
+    const requiredPcs = unitType === 'strip' ? item.quantity * 10 : item.quantity;
+    if (requiredPcs > item.stock_quantity) {
+        if (unitType === 'strip') {
+            const maxStrips = Math.floor(item.stock_quantity / 10);
+            if (maxStrips > 0) {
+                item.quantity = maxStrips;
+                showToast(`Adjusted to maximum available strips (${maxStrips} strips = ${maxStrips * 10} pcs).`, 'info');
+            } else {
+                item.unit_type = 'piece';
+                showToast(`Less than 10 pieces in stock. Switched back to Piece unit.`, 'warning');
+            }
+        }
+    }
+
+    sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
+    renderCart();
 }
 
 function updateCartQty(index, change) {
@@ -488,10 +525,15 @@ function updateCartQty(index, change) {
         removeFromCart(index);
         return;
     }
-    if (newQty > item.stock_quantity) {
-        showToast(`Cannot exceed available stock (${item.stock_quantity}).`, 'error');
+
+    const multiplier = item.unit_type === 'strip' ? 10 : 1;
+    const requiredPcs = newQty * multiplier;
+
+    if (requiredPcs > item.stock_quantity) {
+        showToast(`Cannot exceed available stock (${item.stock_quantity} pcs).`, 'error');
         return;
     }
+
     item.quantity = newQty;
     sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
     renderCart();
@@ -532,7 +574,11 @@ function initCheckoutForm() {
         const payload = {
             customer_name: name,
             customer_phone: phone,
-            items: cart.map(i => ({ medicine_id: i.medicine_id, quantity: i.quantity }))
+            items: cart.map(i => ({ 
+                medicine_id: i.medicine_id, 
+                quantity: i.unit_type === 'strip' ? i.quantity * 10 : i.quantity,
+                unit_label: i.unit_type === 'strip' ? `${i.quantity} Strip(s) (${i.quantity * 10} pcs)` : `${i.quantity} Pc(s)`
+            }))
         };
 
         try {
@@ -560,10 +606,15 @@ function initCheckoutForm() {
 
                 if (itemsBody) {
                     itemsBody.innerHTML = '';
-                    (data.items || []).forEach(item => {
+                    (data.items || []).forEach((item, idx) => {
+                        const originalCartItem = cart[idx];
+                        const unitDesc = originalCartItem && originalCartItem.unit_type === 'strip' 
+                            ? `${originalCartItem.quantity} Strip(s)` 
+                            : `${item.quantity} Pc(s)`;
+
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                            <td>${escapeHtml(item.name)}</td>
+                            <td>${escapeHtml(item.name)} <small style="color:var(--text-muted);">(${unitDesc})</small></td>
                             <td>${item.quantity}</td>
                             <td>₹${parseFloat(item.price_at_time).toFixed(2)}</td>
                             <td>₹${parseFloat(item.total).toFixed(2)}</td>
