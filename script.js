@@ -300,7 +300,7 @@ async function loadMedicinesList() {
                     <td>
                         <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
                             <button class="btn btn-sm btn-secondary" onclick="openEditMedicineModal(${med.id}, '${safeName}', '${safeDesc}', ${med.price}, ${med.stock_quantity}, '${med.expiry_date}')">Edit</button>
-                            <button class="btn btn-sm btn-secondary" onclick="addPosItemDirect(${med.id}, '${safeName}', ${med.price}, ${med.stock_quantity})">+ POS</button>
+                            <button class="btn btn-sm btn-secondary" onclick="addPosItemDirect(${med.id}, '${safeName}', ${med.price}, ${med.stock_quantity})">+ Bill</button>
                             <button class="btn btn-sm btn-danger" onclick="deleteMedicine(${med.id}, '${safeName}')">Delete</button>
                         </div>
                     </td>
