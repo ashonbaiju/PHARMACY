@@ -12,8 +12,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 -- Seed default Admin User (Username: admin, Password: admin123)
 INSERT INTO `users` (`username`, `password`) 
-VALUES ('admin', 'admin123')
-ON DUPLICATE KEY UPDATE `password` = 'admin123';
+VALUES ('admin', 'admin123');
 
 -- Medicines table
 CREATE TABLE IF NOT EXISTS `medicines` (
