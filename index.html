@@ -21,15 +21,15 @@
     <!-- Main Container -->
     <main class="container dashboard-container" style="flex-grow: 1;">
         
-        <!-- Catalog Header & Search -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <!-- Catalog Header & Search Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; padding: 0.75rem 0 1.25rem 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
             <div>
-                <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.25rem;">Medicine Catalog</h2>
-                <p style="color: var(--text-muted); font-size: 0.88rem;">Explore our healthcare medicines and check live stock availability.</p>
+                <h2 style="font-size: 1.45rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text-main);">Medicine Catalog</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Explore our healthcare medicines and check live stock availability.</p>
             </div>
-            <form id="publicSearchForm" style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="text" name="search" id="publicSearchInput" class="form-control" placeholder="Search medicines..." style="max-width: 240px; height: 36px;">
-                <button type="submit" class="btn btn-primary" style="height: 36px; white-space: nowrap;">Search</button>
+            <form id="publicSearchForm" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
+                <input type="text" name="search" id="publicSearchInput" class="form-control" placeholder="Search medicines..." style="width: 240px; height: 38px;">
+                <button type="submit" class="btn btn-primary" style="height: 38px; padding: 0 1.15rem; font-weight: 600; white-space: nowrap;">Search</button>
             </form>
         </div>
 
