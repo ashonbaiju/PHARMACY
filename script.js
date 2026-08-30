@@ -273,7 +273,7 @@ async function loadMedicinesList() {
                 tr.innerHTML = `
                     <td>
                         <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <img src="${med.image_path}" alt="${med.name}" style="width:36px; height:36px; object-fit:cover; border-radius:6px; background:#f1f5f9;" onerror="this.src='default-medicine.svg'">
+                            <img src="${med.image_path}" alt="${med.name}" style="width:36px; height:36px; object-fit:cover; border-radius:6px; background:#f1f5f9;" onerror="this.src='image.png'">
                             <strong>${med.name}</strong>
                         </div>
                     </td>
@@ -385,7 +385,7 @@ function renderPosCatalog(items) {
         }
 
         card.innerHTML = `
-            <img src="${med.image_path}" alt="${med.name}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; background: #f1f5f9;" onerror="this.src='default-medicine.svg'">
+            <img src="${med.image_path}" alt="${med.name}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; background: #f1f5f9;" onerror="this.src='image.png'">
             <strong style="font-size: 0.8rem; line-height: 1.25; height: 32px; overflow: hidden; margin-bottom: 0.25rem;">${med.name}</strong>
             <div>
                 <div class="price-tag" style="font-size: 0.88rem; font-weight: 700; color: var(--primary);">₹${parseFloat(med.price).toFixed(2)}</div>

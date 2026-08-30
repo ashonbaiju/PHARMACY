@@ -102,7 +102,7 @@ switch ($action) {
             sendJsonResponse(false, 'Please enter valid medicine name, price, and stock quantity.');
         }
 
-        $imagePath = 'default-medicine.svg';
+        $imagePath = 'image.png';
 
         // Optional image upload
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -147,7 +147,7 @@ switch ($action) {
             sendJsonResponse(false, 'Please provide valid medicine ID, name, price, and stock.');
         }
 
-        // Optional new image
+        $imagePath = 'image.png';
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'svg'])) {
