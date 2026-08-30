@@ -55,3 +55,10 @@ INSERT INTO `medicines` (`name`, `description`, `price`, `stock_quantity`, `expi
 ('Cetirizine 10mg', 'Antihistamine that treats allergy symptoms such as sneezing and runny nose.', 5.00, 5, '2026-08-30', 'default-medicine.svg'),
 ('Metformin 500mg', 'Used with proper diet and exercise program to control high blood sugar in type 2 diabetes.', 9.50, 200, '2028-03-15', 'default-medicine.svg'),
 ('Vitamin C 1000mg', 'Immune support supplement with antioxidants.', 8.00, 95, '2027-11-10', 'default-medicine.svg');
+
+-- Seed Sample Sales & Sale Items (Demo for Recent Sales & Revenue)
+INSERT INTO `sales` (`id`, `customer_name`, `customer_phone`, `total_amount`, `sale_date`) VALUES
+(1, 'Rahul Sharma', '+91 98765 43210', 45.00, '2026-08-29 10:30:00');
+
+INSERT INTO `sale_items` (`sale_id`, `medicine_id`, `quantity`, `price_at_time`) VALUES
+(1, 1, 10, 4.50);
