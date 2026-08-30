@@ -207,25 +207,15 @@ switch ($action) {
     // ==========================================
     // 3. DASHBOARD STATISTICS
     // ==========================================
-
-    case 'dashboard_stats':
     case 'stats':
+    case 'dashboard_stats':
         requireAuth();
 
-        $today = date('Y-m-d');
+        // 1. Total medicines count
+        $medStmt = $pdo->query("SELECT COUNT(*) FROM medicines");
+        $totalProducts = (int)$medStmt->fetchColumn();
 
-        // Total medicines & stock counts
-        $medStmt = $pdo->query("
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN stock_quantity > 10 THEN 1 ELSE 0 END) as healthy,
-                SUM(CASE WHEN stock_quantity > 0 AND stock_quantity <= 10 THEN 1 ELSE 0 END) as low,
-                SUM(CASE WHEN stock_quantity <= 0 THEN 1 ELSE 0 END) as out_of_stock
-            FROM medicines
-        ");
-        $medStats = $medStmt->fetch();
-
-        // Low stock items list (stock <= 10)
+        // 2. Low stock items (stock <= 10)
         $lowItemsStmt = $pdo->query("
             SELECT id, name, stock_quantity, price 
             FROM medicines 
@@ -234,35 +224,24 @@ switch ($action) {
             LIMIT 10
         ");
         $lowStockItems = $lowItemsStmt->fetchAll();
+        $lowStockCount = count($lowStockItems);
 
-        // Sales today
-        $today = date('Y-m-d');
-        $todayStmt = $pdo->prepare("
-            SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total 
-            FROM sales 
-            WHERE DATE(sale_date) = CURDATE() OR DATE(sale_date) = :today
-        ");
-        $todayStmt->execute(['today' => $today]);
-        $todayStats = $todayStmt->fetch();
+        // 3. Simple addition of total sales and total revenue
+        $salesStmt = $pdo->query("SELECT COUNT(*) as total_sales, COALESCE(SUM(total_amount), 0) as total_revenue FROM sales");
+        $salesData = $salesStmt->fetch();
+        $totalSales = (int)($salesData['total_sales'] ?? 0);
+        $totalRevenue = (float)($salesData['total_revenue'] ?? 0);
 
-        // All-time sales
-        $allStmt = $pdo->query("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total FROM sales");
-        $overallStats = $allStmt->fetch();
-
-        // Recent 5 sales
+        // 4. Recent 5 sales
         $recentStmt = $pdo->query("SELECT id, customer_name, customer_phone, total_amount, sale_date FROM sales ORDER BY sale_date DESC LIMIT 5");
         $recentSales = $recentStmt->fetchAll();
 
         sendJsonResponse(true, 'Stats retrieved', [
-            'total_products' => (int)($medStats['total'] ?? 0),
-            'healthy_stock_count' => (int)($medStats['healthy'] ?? 0),
-            'low_stock_count' => (int)($medStats['low'] ?? 0),
-            'out_of_stock_count' => (int)($medStats['out_of_stock'] ?? 0),
+            'total_products' => $totalProducts,
+            'low_stock_count' => $lowStockCount,
             'low_stock_items' => $lowStockItems,
-            'sales_today_count' => (int)($todayStats['count'] ?? 0),
-            'revenue_today' => (float)($todayStats['total'] ?? 0),
-            'overall_sales_count' => (int)($overallStats['count'] ?? 0),
-            'overall_revenue' => (float)($overallStats['total'] ?? 0),
+            'total_sales' => $totalSales,
+            'total_revenue' => $totalRevenue,
             'recent_sales' => $recentSales
         ]);
         break;

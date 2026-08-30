@@ -95,13 +95,13 @@ async function loadDashboardStats() {
         const data = result.data;
 
         // Key numbers
-        const salesTodayElem = document.getElementById('statSalesToday');
-        const revenueTodayElem = document.getElementById('statRevenueToday');
+        const salesElem = document.getElementById('statSalesToday') || document.getElementById('statTotalSales');
+        const revenueElem = document.getElementById('statRevenueToday') || document.getElementById('statTotalRevenue');
         const totalProductsElem = document.getElementById('statTotalProducts');
         const lowStockCountElem = document.getElementById('statLowStockCount');
 
-        if (salesTodayElem) salesTodayElem.textContent = data.sales_today_count;
-        if (revenueTodayElem) revenueTodayElem.textContent = `₹${data.revenue_today.toFixed(2)}`;
+        if (salesElem) salesElem.textContent = data.total_sales ?? 0;
+        if (revenueElem) revenueElem.textContent = `₹${parseFloat(data.total_revenue ?? 0).toFixed(2)}`;
         if (totalProductsElem) totalProductsElem.textContent = data.total_products;
         if (lowStockCountElem) lowStockCountElem.textContent = data.low_stock_count;
 
