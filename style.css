@@ -102,48 +102,6 @@ a:hover {
 .dashboard-container {
   padding: 1.5rem 1.25rem 3rem;
 }
-
-/* Greeting Banner */
-.greeting-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.greeting-text h2 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-
-.greeting-text p {
-  color: var(--text-muted);
-  font-size: 0.88rem;
-}
-
-.greeting-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.date-pill {
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
-  padding: 0.4rem 0.85rem;
-  border-radius: 20px;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
 /* Horizontal Metric Strip */
 .metrics-strip {
   display: grid;
