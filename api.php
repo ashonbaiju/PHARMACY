@@ -35,8 +35,10 @@ switch ($action) {
         $stmt->execute(['username' => $username]);
         $user = $stmt->fetch();
 
-        // Verify password against database record
-        if ($user && (password_verify($password, $user['password_hash']) || $password === $user['password_hash'])) {
+        $savedPassword = $user['password'] ?? $user['password_hash'] ?? '';
+
+        // Verify password (plain comparison or hash)
+        if ($user && ($password === $savedPassword || password_verify($password, $savedPassword))) {
             $_SESSION['is_admin'] = true;
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];

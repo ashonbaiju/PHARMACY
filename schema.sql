@@ -6,9 +6,15 @@ USE `pharma_db`;
 CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `username` VARCHAR(50) NOT NULL UNIQUE,
-    `password_hash` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Seed default Admin User (Username: admin, Password: admin123)
+INSERT INTO `users` (`username`, `password`) 
+VALUES ('admin', 'admin123')
+ON DUPLICATE KEY UPDATE `password` = 'admin123';
+
 
 -- Medicines table
 CREATE TABLE IF NOT EXISTS `medicines` (
@@ -42,11 +48,6 @@ CREATE TABLE IF NOT EXISTS `sale_items` (
     FOREIGN KEY (`medicine_id`) REFERENCES `medicines`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Seed default Admin User (Username: admin, Password: admin123)
--- Hash generated using password_hash('admin123', PASSWORD_BCRYPT)
-INSERT INTO `users` (`username`, `password_hash`) 
-VALUES ('admin', '$2y$10$UYTfOj33LjglZ82eDIO2ouFvqvaAeQXmwoknSwU1VCxJryNZY7vSC')
-ON DUPLICATE KEY UPDATE `password_hash` = '$2y$10$UYTfOj33LjglZ82eDIO2ouFvqvaAeQXmwoknSwU1VCxJryNZY7vSC';
 
 -- Seed Sample Medicines
 INSERT INTO `medicines` (`name`, `description`, `price`, `stock_quantity`, `expiry_date`, `image_path`) VALUES
