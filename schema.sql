@@ -1,5 +1,5 @@
 -- Database creation
-CREATE DATABASE IF NOT EXISTS `pharma_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS `pharma_db`;
 USE `pharma_db`;
 
 -- Users table for authentication
@@ -8,13 +8,12 @@ CREATE TABLE IF NOT EXISTS `users` (
     `username` VARCHAR(50) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- Seed default Admin User (Username: admin, Password: admin123)
 INSERT INTO `users` (`username`, `password`) 
 VALUES ('admin', 'admin123')
 ON DUPLICATE KEY UPDATE `password` = 'admin123';
-
 
 -- Medicines table
 CREATE TABLE IF NOT EXISTS `medicines` (
@@ -26,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `medicines` (
     `expiry_date` DATE NOT NULL,
     `image_path` VARCHAR(255) DEFAULT 'default-medicine.svg',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- Sales table
 CREATE TABLE IF NOT EXISTS `sales` (
@@ -35,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `sales` (
     `customer_phone` VARCHAR(20) NOT NULL,
     `total_amount` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     `sale_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- Sale items table
 CREATE TABLE IF NOT EXISTS `sale_items` (
@@ -46,8 +45,7 @@ CREATE TABLE IF NOT EXISTS `sale_items` (
     `price_at_time` DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (`sale_id`) REFERENCES `sales`(`id`) ON DELETE CASCADE,
     FOREIGN KEY (`medicine_id`) REFERENCES `medicines`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+);
 
 -- Seed Sample Medicines
 INSERT INTO `medicines` (`name`, `description`, `price`, `stock_quantity`, `expiry_date`, `image_path`) VALUES
