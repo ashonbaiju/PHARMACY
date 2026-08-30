@@ -87,10 +87,21 @@ function populateCurrentDate() {
 // ==========================================
 
 async function loadDashboardStats() {
+    const recentBody = document.getElementById('recentSalesTableBody');
+    const lowStockBody = document.getElementById('lowStockTableBody');
+
     try {
         const res = await fetch('api.php?action=stats');
         const result = await res.json();
-        if (!result.success) return;
+        
+        if (!result.success) {
+            if (result.message && result.message.toLowerCase().includes('auth')) {
+                window.location.href = 'login.html';
+            }
+            if (recentBody) recentBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color:var(--danger);">Please log in to view sales.</td></tr>';
+            if (lowStockBody) lowStockBody.innerHTML = '<tr><td colspan="3" class="text-center" style="color:var(--danger);">Please log in to view stock status.</td></tr>';
+            return;
+        }
 
         const data = result.data;
 
@@ -106,7 +117,6 @@ async function loadDashboardStats() {
         if (lowStockCountElem) lowStockCountElem.textContent = data.low_stock_count;
 
         // Recent sales table
-        const recentBody = document.getElementById('recentSalesTableBody');
         if (recentBody) {
             if (data.recent_sales && data.recent_sales.length > 0) {
                 recentBody.innerHTML = '';
@@ -121,12 +131,11 @@ async function loadDashboardStats() {
                     recentBody.appendChild(tr);
                 });
             } else {
-                recentBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color:var(--text-muted);">No sales recorded yet today.</td></tr>';
+                recentBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color:var(--text-muted);">No sales recorded yet.</td></tr>';
             }
         }
 
         // Low stock alerts table
-        const lowStockBody = document.getElementById('lowStockTableBody');
         if (lowStockBody) {
             const lowItems = data.low_stock_items || [];
             if (lowItems.length === 0) {
@@ -146,7 +155,8 @@ async function loadDashboardStats() {
         }
 
     } catch (err) {
-        console.error(err);
+        if (recentBody) recentBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color:var(--danger);">Error loading recent sales.</td></tr>';
+        if (lowStockBody) lowStockBody.innerHTML = '<tr><td colspan="3" class="text-center" style="color:var(--danger);">Error loading stock alerts.</td></tr>';
     }
 }
 
