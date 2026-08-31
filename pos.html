@@ -98,32 +98,34 @@
                 <h3 id="receiptInvoiceTitle">Invoice Receipt</h3>
                 <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('invoiceReceiptModal')">&times;</button>
             </div>
-            <div class="modal-body" id="invoicePrintArea">
-                <div style="text-align: center; margin-bottom: 1rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.75rem;">
-                    <h2 style="font-size: 1.3rem; margin-bottom: 0.2rem;">PharmaCare</h2>
-                    <p style="color: var(--text-muted); font-size: 0.8rem;">Retail &amp; Prescription Pharmacy</p>
-                    <div id="receiptInvoiceMeta" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-main);"></div>
-                </div>
+            <div class="modal-body">
+                <div id="invoicePrintArea">
+                    <div style="text-align: center; margin-bottom: 1rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.75rem;">
+                        <h2 style="font-size: 1.3rem; margin-bottom: 0.2rem;">PharmaCare</h2>
+                        <p style="color: var(--text-muted); font-size: 0.8rem;">Retail &amp; Prescription Pharmacy</p>
+                        <div id="receiptInvoiceMeta" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-main);"></div>
+                    </div>
 
-                <div id="receiptCustomerInfo" style="margin-bottom: 1rem; font-size: 0.88rem; background: var(--surface-alt); padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--border);"></div>
+                    <div id="receiptCustomerInfo" style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 0.88rem; background: var(--surface-alt); padding: 0.75rem 1rem; border-radius: var(--radius); border: 1px solid var(--border);"></div>
 
-                <div class="table-responsive" style="margin-bottom: 1rem;">
-                    <table class="table" style="font-size: 0.88rem;">
-                        <thead>
-                            <tr>
-                                <th>Medicine</th>
-                                <th>Qty</th>
-                                <th>Price</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="receiptItemsBody"></tbody>
-                    </table>
-                </div>
+                    <div class="table-responsive" style="margin-bottom: 1rem;">
+                        <table class="table" style="width: 100%; font-size: 0.88rem;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Medicine</th>
+                                    <th style="text-align: center; width: 60px;">Qty</th>
+                                    <th style="text-align: right; width: 90px;">Price</th>
+                                    <th style="text-align: right; width: 90px;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receiptItemsBody"></tbody>
+                        </table>
+                    </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 2px dashed var(--border); font-size: 1.15rem; font-weight: 700;">
-                    <span>Grand Total:</span>
-                    <span id="receiptGrandTotal" class="price-tag" style="font-size: 1.35rem;">₹0.00</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 2px dashed var(--border); font-size: 1.15rem; font-weight: 700;">
+                        <span>Grand Total:</span>
+                        <span id="receiptGrandTotal" class="price-tag" style="font-size: 1.35rem;">₹0.00</span>
+                    </div>
                 </div>
 
                 <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
@@ -274,14 +276,17 @@
 
                 document.getElementById('receiptInvoiceTitle').textContent = `Invoice (#INV-${sale.sale_id})`;
                 document.getElementById('receiptInvoiceMeta').textContent = `Date: ${sale.sale_date} | Invoice: #INV-${sale.sale_id}`;
-                document.getElementById('receiptCustomerInfo').innerHTML = `<strong>Customer:</strong> ${sale.customer_name} | <strong>Phone:</strong> ${sale.customer_phone}`;
+                document.getElementById('receiptCustomerInfo').innerHTML = `
+                    <div><strong>Customer:</strong> ${sale.customer_name}</div>
+                    <div><strong>Phone:</strong> ${sale.customer_phone}</div>
+                `;
                 
                 document.getElementById('receiptItemsBody').innerHTML = (sale.items || []).map(i => `
                     <tr>
-                        <td>${i.name}</td>
-                        <td>${i.quantity}</td>
-                        <td>₹${parseFloat(i.price_at_time).toFixed(2)}</td>
-                        <td>₹${parseFloat(i.total).toFixed(2)}</td>
+                        <td style="text-align: left;">${i.name}</td>
+                        <td style="text-align: center;">${i.quantity}</td>
+                        <td style="text-align: right;">₹${parseFloat(i.price_at_time).toFixed(2)}</td>
+                        <td style="text-align: right;">₹${parseFloat(i.total).toFixed(2)}</td>
                     </tr>
                 `).join('');
 
