@@ -134,417 +134,180 @@
         </div>
     </div>
 
-    <!-- Billing Script Logic -->
+    <!-- Simple POS Billing Script -->
     <script>
         let cart = [];
-        let posMedicinesCatalog = [];
+        let catalog = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
+            fetch('api.php?action=check').then(r => r.json()).then(res => {
+                if (!res.success) window.location.href = 'login.html';
+            });
+            loadCatalog();
+            
+            document.getElementById('posCatalogSearch')?.addEventListener('input', (e) => {
+                const q = e.target.value.toLowerCase().trim();
+                renderCatalog(catalog.filter(m => m.name.toLowerCase().includes(q)));
+            });
 
-            // Load stored cart
-            try {
-                const saved = sessionStorage.getItem('pharmacy_cart');
-                if (saved) cart = JSON.parse(saved);
-            } catch(e) {}
-
-            loadPosCatalog();
-            renderCart();
-
-            // Catalog search input
-            const searchInput = document.getElementById('posCatalogSearch');
-            if (searchInput) {
-                searchInput.addEventListener('input', () => {
-                    const query = searchInput.value.toLowerCase().trim();
-                    const filtered = posMedicinesCatalog.filter(m => m.name.toLowerCase().includes(query));
-                    renderPosCatalog(filtered);
-                });
-            }
-
-            // Checkout form submit
-            const checkoutForm = document.getElementById('posCheckoutForm');
-            if (checkoutForm) {
-                checkoutForm.addEventListener('submit', handleCheckout);
-            }
+            document.getElementById('posCheckoutForm')?.addEventListener('submit', handleCheckout);
         });
-
-        async function checkAuth() {
-            try {
-                const res = await fetch('api.php?action=check');
-                const result = await res.json();
-                if (!result.success) window.location.href = 'login.html';
-            } catch (err) {
-                window.location.href = 'login.html';
-            }
-        }
 
         async function handleLogout(e) {
             if (e) e.preventDefault();
-            try { await fetch('api.php?action=logout'); } catch (err) {}
-            sessionStorage.removeItem('pharmacy_cart');
+            await fetch('api.php?action=logout');
             window.location.href = 'login.html';
         }
 
-        async function loadPosCatalog() {
-            const grid = document.getElementById('posCatalogGrid');
-            if (!grid) return;
-
-            try {
-                const res = await fetch('api.php?action=medicines');
-                const result = await res.json();
-
-                if (result.success && result.data.length > 0) {
-                    posMedicinesCatalog = result.data;
-                    renderPosCatalog(posMedicinesCatalog);
-                } else {
-                    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 4rem 0;">No medicines in inventory.</div>';
-                }
-            } catch (err) {
-                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--danger); padding: 4rem 0;">Failed to load catalog.</div>';
-            }
+        async function loadCatalog() {
+            const res = await fetch('api.php?action=medicines');
+            const result = await res.json();
+            catalog = result.data || [];
+            renderCatalog(catalog);
         }
 
-        function renderPosCatalog(items) {
+        function renderCatalog(items) {
             const grid = document.getElementById('posCatalogGrid');
             if (!grid) return;
-
-            grid.innerHTML = '';
-            items.forEach(med => {
-                const card = document.createElement('div');
-                card.className = 'panel';
-                card.style.padding = '0.75rem';
-                card.style.cursor = 'pointer';
-                card.style.textAlign = 'center';
-                card.style.display = 'flex';
-                card.style.flexDirection = 'column';
-                card.style.alignItems = 'center';
-                card.style.marginBottom = '0';
-
-                let stockText = `${med.stock_quantity} left`;
-                let stockColor = 'var(--text-muted)';
-                if (med.stock_quantity <= 0) {
-                    stockText = 'Out of stock';
-                    stockColor = 'var(--danger)';
-                } else if (med.stock_quantity <= 10) {
-                    stockText = 'Low Stock';
-                    stockColor = 'var(--warning)';
-                }
-
-                card.innerHTML = `
-                    <img src="${med.image_path}" alt="${escapeHtml(med.name)}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; background: #f1f5f9;" onerror="this.src='image.png'">
-                    <strong style="font-size: 0.8rem; line-height: 1.25; height: 32px; overflow: hidden; margin-bottom: 0.25rem;">${escapeHtml(med.name)}</strong>
-                    <div>
-                        <div class="price-tag" style="font-size: 0.88rem; font-weight: 700;">₹${parseFloat(med.price).toFixed(2)}</div>
-                        <div style="font-size: 0.68rem; font-weight: 600; color: ${stockColor};">${stockText}</div>
-                    </div>
-                `;
-
-                card.addEventListener('click', () => {
-                    addToCart({
-                        medicine_id: med.id,
-                        name: med.name,
-                        price: parseFloat(med.price),
-                        stock_quantity: parseInt(med.stock_quantity)
-                    });
-                });
-
-                grid.appendChild(card);
-            });
+            grid.innerHTML = items.map(med => `
+                <div class="panel" onclick="addToCart(${med.id}, '${med.name.replace(/'/g, "\\'")}', ${med.price}, ${med.stock_quantity})" style="padding:0.75rem; text-align:center; cursor:pointer; margin-bottom:0;">
+                    <img src="${med.image_path || 'image.png'}" alt="${med.name}" style="width:40px; height:40px; object-fit:cover; border-radius:6px; margin-bottom:0.35rem;" onerror="this.src='image.png'">
+                    <strong style="display:block; font-size:0.8rem; height:30px; overflow:hidden;">${med.name}</strong>
+                    <div class="price-tag" style="font-size:0.85rem; margin-top:0.25rem;">₹${parseFloat(med.price).toFixed(2)}</div>
+                    <small style="color:var(--text-muted); font-size:0.7rem;">Stock: ${med.stock_quantity}</small>
+                </div>
+            `).join('') || '<div style="grid-column:1/-1; text-align:center; padding:2rem 0; color:var(--text-muted);">No medicines found.</div>';
         }
 
-        function addToCart(med) {
-            if (med.stock_quantity <= 0) {
-                alert('This medicine is out of stock.');
-                return;
-            }
-
-            const existing = cart.find(item => item.medicine_id === med.medicine_id);
-            if (existing) {
-                const nextQty = existing.quantity + 1;
-                const requiredPcs = existing.unit_type === 'strip' ? nextQty * 10 : nextQty;
-                if (requiredPcs > med.stock_quantity) {
-                    alert(`Only ${med.stock_quantity} pieces available in stock.`);
-                    return;
-                }
-                existing.quantity = nextQty;
+        function addToCart(id, name, price, stock) {
+            if (stock <= 0) return alert('Medicine is out of stock.');
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                if (item.quantity + 1 > stock) return alert(`Only ${stock} items available in stock.`);
+                item.quantity += 1;
             } else {
-                cart.push({
-                    medicine_id: med.medicine_id,
-                    name: med.name,
-                    price: med.price,
-                    stock_quantity: med.stock_quantity,
-                    unit_type: 'piece',
-                    quantity: 1
-                });
+                cart.push({ id, name, price, stock, quantity: 1 });
             }
-
-            sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
             renderCart();
         }
 
         function renderCart() {
-            const cartContainer = document.getElementById('posCartItemsContainer');
+            const container = document.getElementById('posCartItemsContainer');
             const badge = document.getElementById('posCartBadge');
             const totalElem = document.getElementById('posCartGrandTotal');
-            if (!cartContainer) return;
-
+            
             if (badge) badge.textContent = `${cart.length} item(s)`;
+            let grandTotal = 0;
 
             if (cart.length === 0) {
-                cartContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">No items in cart. Click medicines on the left to add.</div>';
+                if (container) container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:3rem 1rem;">Cart is empty. Click medicines to add.</div>';
                 if (totalElem) totalElem.textContent = '₹0.00';
                 return;
             }
 
-            cartContainer.innerHTML = '';
-            let grandTotal = 0;
-
-            cart.forEach((item, index) => {
-                item.unit_type = item.unit_type || 'piece';
-                const unitMultiplier = item.unit_type === 'strip' ? 10 : 1;
-                const unitPrice = item.price * unitMultiplier;
-                const itemTotal = unitPrice * item.quantity;
-                grandTotal += itemTotal;
-
-                const row = document.createElement('div');
-                row.style.display = 'flex';
-                row.style.alignItems = 'center';
-                row.style.justifyContent = 'space-between';
-                row.style.padding = '0.65rem 0';
-                row.style.borderBottom = '1px solid var(--border)';
-
-                row.innerHTML = `
-                    <div style="flex:1; padding-right: 0.5rem;">
-                        <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; margin-bottom: 0.2rem;">
-                            <strong>${escapeHtml(item.name)}</strong>
-                            <select onchange="updateCartUnit(${index}, this.value)" class="form-control" style="width:auto; padding:0.1rem 0.35rem; font-size:0.75rem; height:26px; border-radius:4px; display:inline-block; font-weight:600; cursor:pointer;">
-                                <option value="piece" ${item.unit_type === 'piece' ? 'selected' : ''}>Piece (1x)</option>
-                                <option value="strip" ${item.unit_type === 'strip' ? 'selected' : ''}>Strip (10x)</option>
-                            </select>
+            if (container) {
+                container.innerHTML = cart.map((item, idx) => {
+                    const total = item.price * item.quantity;
+                    grandTotal += total;
+                    return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0; border-bottom:1px solid var(--border);">
+                            <div>
+                                <strong>${item.name}</strong>
+                                <div style="font-size:0.78rem; color:var(--text-muted);">₹${item.price.toFixed(2)} × ${item.quantity} = ₹${total.toFixed(2)}</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.35rem;">
+                                <input type="number" min="1" max="${item.stock}" value="${item.quantity}" onchange="setQty(${idx}, this.value)" style="width:48px; height:26px; text-align:center; border:1px solid var(--border); border-radius:4px;">
+                                <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${idx})" style="padding:0.15rem 0.45rem;">&times;</button>
+                            </div>
                         </div>
-                        <div id="cartItemText_${index}" style="font-size:0.8rem; color:var(--text-muted);">
-                            ₹${unitPrice.toFixed(2)} × ${item.quantity} ${item.unit_type === 'strip' ? 'strip(s)' : 'pc(s)'} = <strong>₹${itemTotal.toFixed(2)}</strong>
-                        </div>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:0.3rem;">
-                        <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, -1)" style="padding:0.2rem 0.45rem; height:28px; width:28px;">-</button>
-                        <input type="number" min="1" value="${item.quantity}" oninput="setCartDirectQty(${index}, this.value)" onchange="renderCart()" class="form-control mono" style="width: 52px; height: 28px; padding: 0.2rem 0.25rem; text-align: center; font-size: 0.88rem; font-weight: 700; border-radius: 4px;">
-                        <button type="button" class="btn btn-sm btn-secondary" onclick="updateCartQty(${index}, 1)" style="padding:0.2rem 0.45rem; height:28px; width:28px;">+</button>
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})" style="padding:0.2rem 0.45rem; height:28px; width:28px;">&times;</button>
-                    </div>
-                `;
-                cartContainer.appendChild(row);
-            });
-
+                    `;
+                }).join('');
+            }
             if (totalElem) totalElem.textContent = `₹${grandTotal.toFixed(2)}`;
         }
 
-        function setCartDirectQty(index, rawVal) {
-            const item = cart[index];
-            if (!item) return;
-
-            let val = parseInt(rawVal);
-            if (isNaN(val) || val <= 0) val = 1;
-
-            const multiplier = item.unit_type === 'strip' ? 10 : 1;
-            const requiredPcs = val * multiplier;
-
-            if (requiredPcs > item.stock_quantity) {
-                val = Math.max(1, Math.floor(item.stock_quantity / multiplier));
-                alert(`Cannot exceed available stock (${item.stock_quantity} pcs). Set to ${val}.`);
+        function setQty(idx, val) {
+            let q = parseInt(val);
+            if (isNaN(q) || q < 1) q = 1;
+            if (q > cart[idx].stock) {
+                alert(`Maximum available stock is ${cart[idx].stock}`);
+                q = cart[idx].stock;
             }
-
-            item.quantity = val;
-            sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
-
-            const textElem = document.getElementById(`cartItemText_${index}`);
-            const unitPrice = item.price * multiplier;
-            const itemTotal = unitPrice * item.quantity;
-            if (textElem) {
-                textElem.innerHTML = `₹${unitPrice.toFixed(2)} × ${item.quantity} ${item.unit_type === 'strip' ? 'strip(s)' : 'pc(s)'} = <strong>₹${itemTotal.toFixed(2)}</strong>`;
-            }
-
-            const totalElem = document.getElementById('posCartGrandTotal');
-            let grandTotal = 0;
-            cart.forEach(it => {
-                const mult = it.unit_type === 'strip' ? 10 : 1;
-                grandTotal += (it.price * mult) * it.quantity;
-            });
-            if (totalElem) totalElem.textContent = `₹${grandTotal.toFixed(2)}`;
-        }
-
-        function updateCartUnit(index, unitType) {
-            const item = cart[index];
-            if (!item) return;
-
-            item.unit_type = unitType;
-            const requiredPcs = unitType === 'strip' ? item.quantity * 10 : item.quantity;
-            if (requiredPcs > item.stock_quantity && unitType === 'strip') {
-                const maxStrips = Math.floor(item.stock_quantity / 10);
-                if (maxStrips > 0) {
-                    item.quantity = maxStrips;
-                    alert(`Adjusted to available strips (${maxStrips} strips = ${maxStrips * 10} pcs).`);
-                } else {
-                    item.unit_type = 'piece';
-                    alert(`Less than 10 pieces in stock. Switched back to Piece unit.`);
-                }
-            }
-
-            sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
+            cart[idx].quantity = q;
             renderCart();
         }
 
-        function updateCartQty(index, change) {
-            const item = cart[index];
-            if (!item) return;
-
-            const newQty = item.quantity + change;
-            if (newQty <= 0) {
-                removeFromCart(index);
-                return;
-            }
-
-            const multiplier = item.unit_type === 'strip' ? 10 : 1;
-            if (newQty * multiplier > item.stock_quantity) {
-                alert(`Cannot exceed available stock (${item.stock_quantity} pcs).`);
-                return;
-            }
-
-            item.quantity = newQty;
-            sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
-            renderCart();
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
+        function removeFromCart(idx) {
+            cart.splice(idx, 1);
             renderCart();
         }
 
         function clearCart() {
             cart = [];
-            sessionStorage.removeItem('pharmacy_cart');
             renderCart();
         }
 
         async function handleCheckout(e) {
             e.preventDefault();
-
-            if (cart.length === 0) {
-                alert('Please add medicines to cart before completing sale.');
-                return;
-            }
+            if (cart.length === 0) return alert('Please add items to cart before checkout.');
 
             const name = document.getElementById('posCustomerName').value.trim();
             const phone = document.getElementById('posCustomerPhone').value.trim();
-
-            if (!name || !phone) {
-                alert('Please enter customer name and phone number.');
-                return;
-            }
+            if (!name || !phone) return alert('Please enter customer name and phone.');
 
             const payload = {
                 customer_name: name,
                 customer_phone: phone,
-                items: cart.map(i => ({ 
-                    medicine_id: i.medicine_id, 
-                    quantity: i.unit_type === 'strip' ? i.quantity * 10 : i.quantity
-                }))
+                items: cart.map(i => ({ medicine_id: i.id, quantity: i.quantity }))
             };
 
-            try {
-                const res = await fetch('api.php?action=checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+            const res = await fetch('api.php?action=checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
 
-                const result = await res.json();
-                if (result.success) {
-                    alert('Sale completed successfully!');
-                    
-                    const data = result.data;
-                    const titleElem = document.getElementById('receiptInvoiceTitle');
-                    const metaElem = document.getElementById('receiptInvoiceMeta');
-                    const custElem = document.getElementById('receiptCustomerInfo');
-                    const itemsBody = document.getElementById('receiptItemsBody');
-                    const grandTotalElem = document.getElementById('receiptGrandTotal');
+            if (result.success) {
+                alert('Sale completed successfully!');
+                const sale = result.data;
 
-                    if (titleElem) titleElem.textContent = `Invoice Receipt (#INV-${data.sale_id})`;
-                    if (metaElem) metaElem.textContent = `Invoice: INV-${data.sale_id} | Date: ${data.sale_date}`;
-                    if (custElem) custElem.innerHTML = `<div><strong>Customer:</strong> ${escapeHtml(data.customer_name)}</div><div><strong>Phone:</strong> ${escapeHtml(data.customer_phone)}</div>`;
+                document.getElementById('receiptInvoiceTitle').textContent = `Invoice (#INV-${sale.sale_id})`;
+                document.getElementById('receiptInvoiceMeta').textContent = `Date: ${sale.sale_date} | Invoice: #INV-${sale.sale_id}`;
+                document.getElementById('receiptCustomerInfo').innerHTML = `<strong>Customer:</strong> ${sale.customer_name} | <strong>Phone:</strong> ${sale.customer_phone}`;
+                
+                document.getElementById('receiptItemsBody').innerHTML = (sale.items || []).map(i => `
+                    <tr>
+                        <td>${i.name}</td>
+                        <td>${i.quantity}</td>
+                        <td>₹${parseFloat(i.price_at_time).toFixed(2)}</td>
+                        <td>₹${parseFloat(i.total).toFixed(2)}</td>
+                    </tr>
+                `).join('');
 
-                    if (itemsBody) {
-                        itemsBody.innerHTML = '';
-                        (data.items || []).forEach((item, idx) => {
-                            const originalCartItem = cart[idx];
-                            const unitDesc = originalCartItem && originalCartItem.unit_type === 'strip' 
-                                ? `${originalCartItem.quantity} Strip(s)` 
-                                : `${item.quantity} Pc(s)`;
+                document.getElementById('receiptGrandTotal').textContent = `₹${parseFloat(sale.total_amount).toFixed(2)}`;
+                openModal('invoiceReceiptModal');
 
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td>${escapeHtml(item.name)} <small style="color:var(--text-muted);">(${unitDesc})</small></td>
-                                <td>${item.quantity}</td>
-                                <td>₹${parseFloat(item.price_at_time).toFixed(2)}</td>
-                                <td>₹${parseFloat(item.total).toFixed(2)}</td>
-                            `;
-                            itemsBody.appendChild(tr);
-                        });
-                    }
-
-                    if (grandTotalElem) grandTotalElem.textContent = `₹${parseFloat(data.total_amount).toFixed(2)}`;
-
-                    openModal('invoiceReceiptModal');
-                    clearCart();
-                    document.getElementById('posCheckoutForm').reset();
-                    loadPosCatalog();
-                } else {
-                    alert(result.message || 'Checkout failed');
-                }
-            } catch (err) {
-                alert('Error during checkout');
+                clearCart();
+                document.getElementById('posCheckoutForm').reset();
+                loadCatalog();
+            } else {
+                alert(result.message || 'Checkout failed');
             }
         }
 
         function printReceipt() {
-            const printContent = document.getElementById('invoicePrintArea');
-            if (!printContent) {
-                window.print();
-                return;
-            }
-            const win = window.open('', '', 'height=650,width=500');
-            win.document.write('<html><head><title>Invoice Receipt</title>');
-            win.document.write('<style>body{font-family:sans-serif;padding:20px;font-size:14px;} table{width:100%;border-collapse:collapse;margin:15px 0;} th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left;} th{background:#f1f5f9;}</style>');
-            win.document.write('</head><body>');
-            win.document.write(printContent.innerHTML);
-            win.document.write('</body></html>');
-            win.document.close();
-            win.focus();
-            setTimeout(() => {
-                win.print();
-                win.close();
-            }, 250);
+            window.print();
         }
 
         function openModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) modal.style.display = 'flex';
+            const m = document.getElementById(id);
+            if (m) m.style.display = 'flex';
         }
 
         function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) modal.style.display = 'none';
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            return String(text)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+            const m = document.getElementById(id);
+            if (m) m.style.display = 'none';
         }
     </script>
 </body>
