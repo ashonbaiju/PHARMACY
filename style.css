@@ -468,3 +468,37 @@ a:hover {
 .modal-body {
   padding: 1.25rem;
 }
+
+/* Print / PDF Invoice Rules */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoicePrintArea, #invoicePrintArea * {
+    visibility: visible;
+  }
+  #invoicePrintArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: #ffffff !important;
+    color: #1e293b !important;
+  }
+  .modal-overlay {
+    background: transparent !important;
+    position: static !important;
+    display: block !important;
+  }
+  .modal-card {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+  }
+  .app-header, .btn, .modal-header {
+    display: none !important;
+  }
+}
+

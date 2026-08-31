@@ -302,7 +302,40 @@
         }
 
         function printReceipt() {
-            window.print();
+            const printArea = document.getElementById('invoicePrintArea');
+            if (!printArea) {
+                window.print();
+                return;
+            }
+            const win = window.open('', '', 'width=650,height=750');
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Invoice Receipt - PharmaCare</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 25px; color: #1e293b; max-width: 600px; margin: 0 auto; }
+                        h2 { margin: 0 0 4px 0; font-size: 24px; text-align: center; color: #0284c7; }
+                        p { margin: 0; color: #64748b; font-size: 13px; text-align: center; }
+                        #receiptInvoiceMeta { text-align: center; font-size: 13px; margin: 10px 0 15px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 12px; }
+                        #receiptCustomerInfo { display: flex; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 15px; font-size: 13px; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; }
+                        th, td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; }
+                        th { background: #f1f5f9; color: #475569; font-weight: 600; }
+                        .price-tag { color: #0284c7; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    ${printArea.innerHTML}
+                </body>
+                </html>
+            `);
+            win.document.close();
+            win.focus();
+            setTimeout(() => {
+                win.print();
+                win.close();
+            }, 300);
         }
 
         function openModal(id) {
