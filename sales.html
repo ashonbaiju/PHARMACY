@@ -87,7 +87,115 @@
         </div>
     </div>
 
-    <!-- Script -->
-    <script src="script.js"></script>
+    <!-- Sales History Script Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadSalesHistory();
+        });
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('api.php?action=check');
+                const result = await res.json();
+                if (!result.success) window.location.href = 'login.html';
+            } catch (err) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function handleLogout(e) {
+            if (e) e.preventDefault();
+            try { await fetch('api.php?action=logout'); } catch (err) {}
+            sessionStorage.removeItem('pharmacy_cart');
+            window.location.href = 'login.html';
+        }
+
+        async function loadSalesHistory() {
+            const tableBody = document.getElementById('salesHistoryTableBody');
+            if (!tableBody) return;
+
+            try {
+                const res = await fetch('api.php?action=sales');
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    tableBody.innerHTML = '';
+                    result.data.forEach(sale => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>#INV-${sale.id}</strong></td>
+                            <td>${sale.sale_date}</td>
+                            <td>${escapeHtml(sale.customer_name)}</td>
+                            <td>${escapeHtml(sale.customer_phone)}</td>
+                            <td><strong class="price-tag">₹${parseFloat(sale.total_amount).toFixed(2)}</strong></td>
+                            <td><button class="btn btn-sm btn-secondary" onclick="viewSaleDetails(${sale.id})">View Items</button></td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--text-muted);">No sales records found yet.</td></tr>';
+                }
+            } catch (err) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--danger);">Error loading sales history.</td></tr>';
+            }
+        }
+
+        async function viewSaleDetails(saleId) {
+            try {
+                const res = await fetch(`api.php?action=sales&id=${saleId}`);
+                const result = await res.json();
+
+                if (result.success) {
+                    const sale = result.data;
+                    document.getElementById('modalInvoiceTitle').textContent = `Invoice Details (#INV-${sale.id})`;
+                    document.getElementById('modalCustomerInfo').innerHTML = `
+                        <div><strong>Customer:</strong> ${escapeHtml(sale.customer_name)} (${escapeHtml(sale.customer_phone)})</div>
+                        <div><strong>Date:</strong> ${sale.sale_date}</div>
+                    `;
+
+                    const modalBody = document.getElementById('modalItemsBody');
+                    modalBody.innerHTML = '';
+
+                    sale.items.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const lineTotal = item.quantity * item.price_at_time;
+                        tr.innerHTML = `
+                            <td>${escapeHtml(item.medicine_name || 'Medicine #' + item.medicine_id)}</td>
+                            <td>${item.quantity}</td>
+                            <td>₹${parseFloat(item.price_at_time).toFixed(2)}</td>
+                            <td>₹${lineTotal.toFixed(2)}</td>
+                        `;
+                        modalBody.appendChild(tr);
+                    });
+
+                    document.getElementById('modalGrandTotal').textContent = `₹${parseFloat(sale.total_amount).toFixed(2)}`;
+                    openModal('saleDetailsModal');
+                }
+            } catch (err) {
+                alert('Error loading invoice details');
+            }
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
 </body>
 </html>

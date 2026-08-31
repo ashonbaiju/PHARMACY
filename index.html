@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PharmaCare - Modern Pharmacy Management</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <!-- Header Navigation -->
@@ -20,16 +22,21 @@
 
     <!-- Main Container -->
     <main class="container dashboard-container" style="flex-grow: 1;">
-        
+
         <!-- Catalog Header & Search Bar -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; padding: 0.75rem 0 1.25rem 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; padding: 0.75rem 0 1.25rem 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
             <div>
-                <h2 style="font-size: 1.45rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text-main);">Medicine Catalog</h2>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Explore our healthcare medicines and check live stock availability.</p>
+                <h2 style="font-size: 1.45rem; font-weight: 700; margin-bottom: 0.35rem; color: var(--text-main);">
+                    Medicine Catalog</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Explore our healthcare medicines and
+                    check live stock availability.</p>
             </div>
             <form id="publicSearchForm" style="display: flex; gap: 0.5rem; align-items: center; margin: 0;">
-                <input type="text" name="search" id="publicSearchInput" class="form-control" placeholder="Search medicines..." style="width: 240px; height: 38px;">
-                <button type="submit" class="btn btn-primary" style="height: 38px; padding: 0 1.15rem; font-weight: 600; white-space: nowrap;">Search</button>
+                <input type="text" name="search" id="publicSearchInput" class="form-control"
+                    placeholder="Search medicines..." style="width: 240px; height: 38px;">
+                <button type="submit" class="btn btn-primary"
+                    style="height: 38px; padding: 0 1.15rem; font-weight: 600; white-space: nowrap;">Search</button>
             </form>
         </div>
 
@@ -62,7 +69,7 @@
             }
 
             checkUserSession();
-            
+
             const searchForm = document.getElementById('publicSearchForm');
             const searchInput = document.getElementById('publicSearchInput');
 
@@ -94,7 +101,7 @@
             try {
                 const res = await fetch('api.php?action=check');
                 const result = await res.json();
-                
+
                 if (result.success) {
                     navActions.innerHTML = `
                         <a href="dashboard.html" class="btn btn-secondary btn-sm" style="border-radius:20px; font-weight:600;">
@@ -142,8 +149,8 @@
             const grid = document.getElementById('publicMedicineGrid');
             const search = keyword.toLowerCase().trim();
 
-            const filtered = allCatalogMedicines.filter(m => 
-                m.name.toLowerCase().includes(search) || 
+            const filtered = allCatalogMedicines.filter(m =>
+                m.name.toLowerCase().includes(search) ||
                 (m.description && m.description.toLowerCase().includes(search))
             );
 
@@ -152,7 +159,7 @@
                 filtered.forEach(med => {
                     let stockClass = 'badge-success';
                     let stockText = 'In Stock';
-                    
+
                     const stockQty = parseInt(med.stock_quantity);
                     if (stockQty <= 0) {
                         stockClass = 'badge-danger';
@@ -211,4 +218,5 @@
         }
     </script>
 </body>
+
 </html>

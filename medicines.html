@@ -154,7 +154,207 @@
         </div>
     </div>
 
-    <!-- Script -->
-    <script src="script.js"></script>
+    <!-- Medicine Management Script Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadMedicinesList();
+            initMedicineForms();
+        });
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('api.php?action=check');
+                const result = await res.json();
+                if (!result.success) window.location.href = 'login.html';
+            } catch (err) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function handleLogout(e) {
+            if (e) e.preventDefault();
+            try { await fetch('api.php?action=logout'); } catch (err) {}
+            sessionStorage.removeItem('pharmacy_cart');
+            window.location.href = 'login.html';
+        }
+
+        function initMedicineForms() {
+            // Add Form
+            const addForm = document.getElementById('addMedicineForm');
+            if (addForm) {
+                addForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(addForm);
+                    formData.append('action', 'add_medicine');
+
+                    const res = await fetch('api.php', { method: 'POST', body: formData });
+                    const result = await res.json();
+                    alert(result.message || (result.success ? 'Medicine added successfully!' : 'Failed to add'));
+                    if (result.success) {
+                        addForm.reset();
+                        closeModal('addMedicineModal');
+                        loadMedicinesList();
+                    }
+                });
+            }
+
+            // Edit Form
+            const editForm = document.getElementById('editMedicineForm');
+            if (editForm) {
+                editForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(editForm);
+                    formData.append('action', 'edit_medicine');
+
+                    const res = await fetch('api.php', { method: 'POST', body: formData });
+                    const result = await res.json();
+                    alert(result.message || (result.success ? 'Medicine updated successfully!' : 'Failed to update'));
+                    if (result.success) {
+                        closeModal('editMedicineModal');
+                        loadMedicinesList();
+                    }
+                });
+            }
+
+            // Search Filter
+            const searchInput = document.getElementById('adminMedicineSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    const query = searchInput.value.toLowerCase().trim();
+                    document.querySelectorAll('#adminMedicineTableBody tr').forEach(row => {
+                        row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        async function loadMedicinesList() {
+            const tableBody = document.getElementById('adminMedicineTableBody');
+            if (!tableBody) return;
+
+            try {
+                const res = await fetch('api.php?action=medicines');
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    tableBody.innerHTML = '';
+                    result.data.forEach(med => {
+                        let badgeClass = 'badge-success';
+                        let stockStatus = `${med.stock_quantity} in stock`;
+
+                        if (med.stock_quantity <= 0) {
+                            badgeClass = 'badge-danger';
+                            stockStatus = 'Out of Stock';
+                        } else if (med.stock_quantity <= 10) {
+                            badgeClass = 'badge-warning';
+                            stockStatus = `Low (${med.stock_quantity})`;
+                        }
+
+                        const safeName = escapeHtml(med.name);
+                        const safeDesc = escapeHtml(med.description || '');
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>
+                                <div style="display:flex; align-items:center; gap:0.75rem;">
+                                    <img src="${med.image_path}" alt="${safeName}" style="width:36px; height:36px; object-fit:cover; border-radius:6px; background:#f1f5f9;" onerror="this.src='image.png'">
+                                    <strong>${safeName}</strong>
+                                </div>
+                            </td>
+                            <td>${med.description ? escapeHtml(med.description.substring(0, 45)) + '...' : '-'}</td>
+                            <td><strong>₹${parseFloat(med.price).toFixed(2)}</strong></td>
+                            <td><span class="stock-badge ${badgeClass}">${stockStatus}</span></td>
+                            <td>${med.expiry_date}</td>
+                            <td>
+                                <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                                    <button class="btn btn-sm btn-secondary" onclick="openEditMedicineModal(${med.id}, '${safeName}', '${safeDesc}', ${med.price}, ${med.stock_quantity}, '${med.expiry_date}')">Edit</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="addPosItemDirect(${med.id}, '${safeName}', ${med.price}, ${med.stock_quantity})">+ Bill</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteMedicine(${med.id}, '${safeName}')">Delete</button>
+                                </div>
+                            </td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--text-muted);">No medicines found. Click "+ Add Medicine" to add one.</td></tr>';
+                }
+            } catch (err) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--danger);">Error loading inventory.</td></tr>';
+            }
+        }
+
+        function openEditMedicineModal(id, name, desc, price, stock, expiry) {
+            document.getElementById('editMedId').value = id;
+            document.getElementById('editMedName').value = name;
+            document.getElementById('editMedDesc').value = desc;
+            document.getElementById('editMedPrice').value = price;
+            document.getElementById('editMedStock').value = stock;
+            document.getElementById('editMedExpiry').value = expiry;
+            document.getElementById('editMedImage').value = '';
+            openModal('editMedicineModal');
+        }
+
+        async function deleteMedicine(id, name) {
+            if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'delete_medicine');
+                formData.append('id', id);
+
+                const res = await fetch('api.php', { method: 'POST', body: formData });
+                const result = await res.json();
+                alert(result.message || (result.success ? 'Medicine deleted' : 'Failed to delete'));
+                if (result.success) loadMedicinesList();
+            } catch (err) {
+                alert('Error deleting medicine');
+            }
+        }
+
+        function addPosItemDirect(id, name, price, stock) {
+            let cart = [];
+            try {
+                const saved = sessionStorage.getItem('pharmacy_cart');
+                if (saved) cart = JSON.parse(saved);
+            } catch(e) {}
+
+            const existing = cart.find(item => item.medicine_id === id);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({
+                    medicine_id: id,
+                    name: name,
+                    price: parseFloat(price),
+                    stock_quantity: parseInt(stock),
+                    unit_type: 'piece',
+                    quantity: 1
+                });
+            }
+            sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
+            window.location.href = 'pos.html';
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
 </body>
 </html>
