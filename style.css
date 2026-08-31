@@ -468,26 +468,3 @@ a:hover {
 .modal-body {
   padding: 1.25rem;
 }
-
-/* Toast Notification */
-.toast-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.toast {
-  background: #1e293b;
-  color: #ffffff;
-  padding: 0.65rem 1rem;
-  border-radius: var(--radius);
-  font-size: 0.85rem;
-  transition: opacity 0.3s ease;
-}
-
-.toast.success { background: var(--success); }
-.toast.error { background: var(--danger); }

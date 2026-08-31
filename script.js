@@ -784,26 +784,11 @@ async function viewSaleDetails(saleId) {
 
 
 // ==========================================
-// 6. UTILITIES (Toast, Modals, Escaping)
+// 6. UTILITIES (Alerts, Modals, Escaping)
 // ==========================================
 
-function showToast(message, type = 'info') {
-    let container = document.querySelector('.toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `<span>${message}</span>`;
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+function showToast(message) {
+    alert(message);
 }
 
 function openModal(id) {
