@@ -12,7 +12,9 @@ $pass = '';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        // SQL Injection Prevention: Disable emulated prepared statements to force true MySQL native prepares
+        PDO::ATTR_EMULATE_PREPARES => false
     ]);
 } catch (PDOException $e) {
     die("Database Connection Error: " . $e->getMessage());
