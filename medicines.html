@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Management - PharmaCare</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="app-header">
+        <div class="container navbar">
+            <nav class="top-nav-links">
+                <a href="dashboard.html" class="nav-item">Dashboard Overview</a>
+                <a href="medicines.html" class="nav-item active">Medicine Management</a>
+                <a href="pos.html" class="nav-item">Billing</a>
+                <a href="sales.html" class="nav-item">Sales History</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="index.html" class="btn btn-secondary btn-sm" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Storefront
+                </a>
+                <a href="#" onclick="handleLogout(event)" class="btn btn-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container dashboard-container">
+
+        <!-- MEDICINE INVENTORY PANEL -->
+        <div class="panel" style="margin-bottom: 0;">
+            <div class="panel-header" style="flex-wrap: wrap; gap: 0.75rem;">
+                <h3>Medicine Inventory List</h3>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto;">
+                    <input type="text" id="adminMedicineSearch" class="form-control" placeholder="Search medicines..." style="max-width: 220px; padding: 0.4rem 0.85rem; font-size: 0.85rem; height: 34px;">
+                    <button class="btn btn-sm btn-primary" onclick="openModal('addMedicineModal')" style="height: 34px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Medicine
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="loadMedicinesList()" style="height: 34px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Expiry Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminMedicineTableBody">
+                        <tr><td colspan="6" class="text-center">Loading inventory data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Add Medicine Modal -->
+    <div id="addMedicineModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 id="medicineConsoleTitle">Add New Medicine</h3>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('addMedicineModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addMedicineForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="form-label" for="medName">Medicine Name *</label>
+                        <input type="text" id="medName" name="name" class="form-control" placeholder="e.g. Paracetamol 500mg" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="medDesc">Description</label>
+                        <textarea id="medDesc" name="description" class="form-control" placeholder="Key therapeutic uses, dosage info..."></textarea>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label" for="medPrice">Price (₹) *</label>
+                            <input type="number" step="0.01" id="medPrice" name="price" class="form-control mono" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="medStock">Initial Stock *</label>
+                            <input type="number" id="medStock" name="stock_quantity" class="form-control mono" placeholder="100" required>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label" for="medExpiry">Expiry Date *</label>
+                            <input type="date" id="medExpiry" name="expiry_date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="medImage">Image File</label>
+                            <input type="file" id="medImage" name="image" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">Save Medicine</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Medicine Modal -->
+    <div id="editMedicineModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3>Edit Medicine</h3>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('editMedicineModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editMedicineForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editMedId" name="id">
+                    <div class="form-group">
+                        <label class="form-label" for="editMedName">Medicine Name *</label>
+                        <input type="text" id="editMedName" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="editMedDesc">Description</label>
+                        <textarea id="editMedDesc" name="description" class="form-control" placeholder="Key therapeutic uses, dosage info..."></textarea>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label" for="editMedPrice">Price (₹) *</label>
+                            <input type="number" step="0.01" id="editMedPrice" name="price" class="form-control mono" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editMedStock">Stock Count *</label>
+                            <input type="number" id="editMedStock" name="stock_quantity" class="form-control mono" required>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label" for="editMedExpiry">Expiry Date *</label>
+                            <input type="date" id="editMedExpiry" name="expiry_date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editMedImage">Change Image</label>
+                            <input type="file" id="editMedImage" name="image" class="form-control" accept="image/*">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">Update Medicine</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medicine Management Script Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadMedicinesList();
+            initMedicineForms();
+        });
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('api.php?action=check');
+                const result = await res.json();
+                if (!result.success) window.location.href = 'login.html';
+            } catch (err) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function handleLogout(e) {
+            if (e) e.preventDefault();
+            try { await fetch('api.php?action=logout'); } catch (err) {}
+            sessionStorage.removeItem('pharmacy_cart');
+            window.location.href = 'login.html';
+        }
+
+        function initMedicineForms() {
+            // Add Form
+            const addForm = document.getElementById('addMedicineForm');
+            if (addForm) {
+                addForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(addForm);
+                    formData.append('action', 'add_medicine');
+
+                    const res = await fetch('api.php', { method: 'POST', body: formData });
+                    const result = await res.json();
+                    alert(result.message || (result.success ? 'Medicine added successfully!' : 'Failed to add'));
+                    if (result.success) {
+                        addForm.reset();
+                        closeModal('addMedicineModal');
+                        loadMedicinesList();
+                    }
+                });
+            }
+
+            // Edit Form
+            const editForm = document.getElementById('editMedicineForm');
+            if (editForm) {
+                editForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(editForm);
+                    formData.append('action', 'edit_medicine');
+
+                    const res = await fetch('api.php', { method: 'POST', body: formData });
+                    const result = await res.json();
+                    alert(result.message || (result.success ? 'Medicine updated successfully!' : 'Failed to update'));
+                    if (result.success) {
+                        closeModal('editMedicineModal');
+                        loadMedicinesList();
+                    }
+                });
+            }
+
+            // Search Filter
+            const searchInput = document.getElementById('adminMedicineSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    const query = searchInput.value.toLowerCase().trim();
+                    document.querySelectorAll('#adminMedicineTableBody tr').forEach(row => {
+                        row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        async function loadMedicinesList() {
+            const tableBody = document.getElementById('adminMedicineTableBody');
+            if (!tableBody) return;
+
+            try {
+                const res = await fetch('api.php?action=medicines');
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    tableBody.innerHTML = '';
+                    result.data.forEach(med => {
+                        let badgeClass = 'badge-success';
+                        let stockStatus = `${med.stock_quantity} in stock`;
+
+                        if (med.stock_quantity <= 0) {
+                            badgeClass = 'badge-danger';
+                            stockStatus = 'Out of Stock';
+                        } else if (med.stock_quantity <= 10) {
+                            badgeClass = 'badge-warning';
+                            stockStatus = `Low (${med.stock_quantity})`;
+                        }
+
+                        const safeName = escapeHtml(med.name);
+                        const safeDesc = escapeHtml(med.description || '');
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>
+                                <div style="display:flex; align-items:center; gap:0.75rem;">
+                                    <img src="${med.image_path}" alt="${safeName}" style="width:36px; height:36px; object-fit:cover; border-radius:6px; background:#f1f5f9;" onerror="this.src='image.png'">
+                                    <strong>${safeName}</strong>
+                                </div>
+                            </td>
+                            <td>${med.description ? escapeHtml(med.description.substring(0, 45)) + '...' : '-'}</td>
+                            <td><strong>₹${parseFloat(med.price).toFixed(2)}</strong></td>
+                            <td><span class="stock-badge ${badgeClass}">${stockStatus}</span></td>
+                            <td>${med.expiry_date}</td>
+                            <td>
+                                <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                                    <button class="btn btn-sm btn-secondary" onclick="openEditMedicineModal(${med.id}, '${safeName}', '${safeDesc}', ${med.price}, ${med.stock_quantity}, '${med.expiry_date}')">Edit</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="addPosItemDirect(${med.id}, '${safeName}', ${med.price}, ${med.stock_quantity})">+ Bill</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteMedicine(${med.id}, '${safeName}')">Delete</button>
+                                </div>
+                            </td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--text-muted);">No medicines found. Click "+ Add Medicine" to add one.</td></tr>';
+                }
+            } catch (err) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--danger);">Error loading inventory.</td></tr>';
+            }
+        }
+
+        function openEditMedicineModal(id, name, desc, price, stock, expiry) {
+            document.getElementById('editMedId').value = id;
+            document.getElementById('editMedName').value = name;
+            document.getElementById('editMedDesc').value = desc;
+            document.getElementById('editMedPrice').value = price;
+            document.getElementById('editMedStock').value = stock;
+            document.getElementById('editMedExpiry').value = expiry;
+            document.getElementById('editMedImage').value = '';
+            openModal('editMedicineModal');
+        }
+
+        async function deleteMedicine(id, name) {
+            if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'delete_medicine');
+                formData.append('id', id);
+
+                const res = await fetch('api.php', { method: 'POST', body: formData });
+                const result = await res.json();
+                alert(result.message || (result.success ? 'Medicine deleted' : 'Failed to delete'));
+                if (result.success) loadMedicinesList();
+            } catch (err) {
+                alert('Error deleting medicine');
+            }
+        }
+
+        function addPosItemDirect(id, name, price, stock) {
+            let cart = [];
+            try {
+                const saved = sessionStorage.getItem('pharmacy_cart');
+                if (saved) cart = JSON.parse(saved);
+            } catch(e) {}
+
+            const existing = cart.find(item => item.medicine_id === id);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({
+                    medicine_id: id,
+                    name: name,
+                    price: parseFloat(price),
+                    stock_quantity: parseInt(stock),
+                    unit_type: 'piece',
+                    quantity: 1
+                });
+            }
+            sessionStorage.setItem('pharmacy_cart', JSON.stringify(cart));
+            window.location.href = 'pos.html';
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
