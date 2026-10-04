@@ -1,0 +1,24 @@
+# PHP/Composer
+vendor/
+
+# Environment / Credentials
+.env
+.env.local
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Media/Uploads
+uploads/medicines/*
+!uploads/medicines/.gitkeep
+
+# IDE Config
+.idea/
+.vscode/
+.gemini/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

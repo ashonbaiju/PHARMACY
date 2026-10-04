@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Overview - PharmaCare</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN for Analytics Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="app-header">
+        <div class="container navbar">
+            <nav class="top-nav-links">
+                <a href="dashboard.html" class="nav-item active">Dashboard Overview</a>
+                <a href="medicines.html" class="nav-item">Medicine Management</a>
+                <a href="pos.html" class="nav-item">Billing</a>
+                <a href="sales.html" class="nav-item">Sales History</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="index.html" class="btn btn-secondary btn-sm" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Storefront
+                </a>
+                <a href="#" onclick="handleLogout(event)" class="btn btn-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container dashboard-container">
+
+        <!-- DASHBOARD OVERVIEW CONTENT -->
+        <div id="overview-content">
+            
+            <!-- Metric Strip -->
+            <div class="metrics-strip">
+                <div class="metric-strip-item">
+                    <div class="strip-item-header">
+                        <span class="strip-item-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Total Revenue
+                        </span>
+                        <span class="strip-badge trend-up">Revenue</span>
+                    </div>
+                    <div class="strip-item-value" id="statRevenueToday">₹0.00</div>
+                </div>
+
+                <div class="metric-strip-item">
+                    <div class="strip-item-header">
+                        <span class="strip-item-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            Total Sales
+                        </span>
+                        <span class="strip-badge trend-neutral">Orders</span>
+                    </div>
+                    <div class="strip-item-value" id="statSalesToday">0</div>
+                </div>
+
+                <div class="metric-strip-item">
+                    <div class="strip-item-header">
+                        <span class="strip-item-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            Catalog Products
+                        </span>
+                        <span class="strip-badge trend-neutral">Medicines</span>
+                    </div>
+                    <div class="strip-item-value" id="statTotalProducts">0</div>
+                </div>
+
+                <div class="metric-strip-item">
+                    <div class="strip-item-header">
+                        <span class="strip-item-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            Low Stock Alerts
+                        </span>
+                        <span class="strip-badge trend-alert" id="statLowStockBadge">Needs Attention</span>
+                    </div>
+                    <div class="strip-item-value" id="statLowStockCount">0</div>
+                </div>
+            </div>
+
+            <!-- Two-Column Overview: Recent Sales & Low Stock Alerts -->
+            <div class="overview-grid-2">
+                
+                <!-- Recent Sales Transactions Panel -->
+                <div class="panel" style="margin-bottom:0;">
+                    <div class="panel-header">
+                        <h3>Recent Sales</h3>
+                        <a href="sales.html" class="btn btn-sm btn-secondary">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Invoice</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentSalesTableBody">
+                                <tr><td colspan="4" class="text-center">Loading sales...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Low Stock Alerts Panel -->
+                <div class="panel" style="margin-bottom:0;">
+                    <div class="panel-header">
+                        <h3>Low Stock Alerts</h3>
+                        <a href="medicines.html" class="btn btn-sm btn-secondary">Restock</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Stock</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lowStockTableBody">
+                                <tr><td colspan="3" class="text-center">Loading stock status...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Invoice Details Modal -->
+    <div id="saleDetailsModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3 id="modalInvoiceTitle">Invoice Details</h3>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('saleDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalCustomerInfo" style="margin-bottom: 1.25rem; font-size: 0.9rem; background: var(--surface-alt); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border);"></div>
+                <div class="table-responsive">
+                    <table class="table" style="font-size: 0.88rem;">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalItemsBody"></tbody>
+                    </table>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1.25rem; font-size: 1.15rem; font-weight:700;">
+                    <span>Grand Total:</span>
+                    <span id="modalGrandTotal" class="price-tag" style="font-size:1.35rem;">₹0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Script Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadDashboardStats();
+        });
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('api.php?action=check');
+                const result = await res.json();
+                if (!result.success) window.location.href = 'login.html';
+            } catch (err) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function handleLogout(e) {
+            if (e) e.preventDefault();
+            try { await fetch('api.php?action=logout'); } catch (err) {}
+            sessionStorage.removeItem('pharmacy_cart');
+            window.location.href = 'login.html';
+        }
+
+        async function loadDashboardStats() {
+            const recentBody = document.getElementById('recentSalesTableBody');
+            const lowStockBody = document.getElementById('lowStockTableBody');
+
+            try {
+                const res = await fetch('api.php?action=stats');
+                const result = await res.json();
+
+                if (!result.success) {
+                    if (result.message && result.message.toLowerCase().includes('auth')) {
+                        window.location.href = 'login.html';
+                    }
+                    return;
+                }
+
+                const data = result.data;
+
+                // Numbers
+                const salesElem = document.getElementById('statSalesToday');
+                const revenueElem = document.getElementById('statRevenueToday');
+                const totalProductsElem = document.getElementById('statTotalProducts');
+                const lowStockCountElem = document.getElementById('statLowStockCount');
+
+                if (salesElem) salesElem.textContent = data.total_sales ?? 0;
+                if (revenueElem) revenueElem.textContent = `₹${parseFloat(data.total_revenue ?? 0).toFixed(2)}`;
+                if (totalProductsElem) totalProductsElem.textContent = data.total_products;
+                if (lowStockCountElem) lowStockCountElem.textContent = data.low_stock_count;
+
+                // Recent sales table
+                if (recentBody) {
+                    if (data.recent_sales && data.recent_sales.length > 0) {
+                        recentBody.innerHTML = '';
+                        data.recent_sales.forEach(sale => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td><strong>#INV-${sale.id}</strong></td>
+                                <td>${escapeHtml(sale.customer_name)}</td>
+                                <td><strong class="price-tag">₹${parseFloat(sale.total_amount).toFixed(2)}</strong></td>
+                                <td><button class="btn btn-sm btn-secondary" onclick="viewSaleDetails(${sale.id})">Details</button></td>
+                            `;
+                            recentBody.appendChild(tr);
+                        });
+                    } else {
+                        recentBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color:var(--text-muted);">No sales recorded yet.</td></tr>';
+                    }
+                }
+
+                // Low stock alerts table
+                if (lowStockBody) {
+                    const lowItems = data.low_stock_items || [];
+                    if (lowItems.length === 0) {
+                        lowStockBody.innerHTML = '<tr><td colspan="3" class="text-center" style="color:var(--success);">All stock levels are optimal!</td></tr>';
+                    } else {
+                        lowStockBody.innerHTML = '';
+                        lowItems.forEach(item => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td><strong>${escapeHtml(item.name)}</strong></td>
+                                <td><span class="stock-badge ${item.stock_quantity <= 0 ? 'badge-danger' : 'badge-warning'}">${item.stock_quantity} left</span></td>
+                                <td>₹${parseFloat(item.price).toFixed(2)}</td>
+                            `;
+                            lowStockBody.appendChild(tr);
+                        });
+                    }
+                }
+
+            } catch (err) {
+                if (recentBody) recentBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color:var(--danger);">Error loading recent sales.</td></tr>';
+                if (lowStockBody) lowStockBody.innerHTML = '<tr><td colspan="3" class="text-center" style="color:var(--danger);">Error loading stock alerts.</td></tr>';
+            }
+        }
+
+        async function viewSaleDetails(saleId) {
+            try {
+                const res = await fetch(`api.php?action=sales&id=${saleId}`);
+                const result = await res.json();
+
+                if (result.success) {
+                    const sale = result.data;
+                    document.getElementById('modalInvoiceTitle').textContent = `Invoice Details (#INV-${sale.id})`;
+                    document.getElementById('modalCustomerInfo').innerHTML = `
+                        <div><strong>Customer:</strong> ${escapeHtml(sale.customer_name)} (${escapeHtml(sale.customer_phone)})</div>
+                        <div><strong>Date:</strong> ${sale.sale_date}</div>
+                    `;
+
+                    const modalBody = document.getElementById('modalItemsBody');
+                    modalBody.innerHTML = '';
+
+                    sale.items.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const lineTotal = item.quantity * item.price_at_time;
+                        tr.innerHTML = `
+                            <td>${escapeHtml(item.medicine_name || 'Medicine #' + item.medicine_id)}</td>
+                            <td>${item.quantity}</td>
+                            <td>₹${parseFloat(item.price_at_time).toFixed(2)}</td>
+                            <td>₹${lineTotal.toFixed(2)}</td>
+                        `;
+                        modalBody.appendChild(tr);
+                    });
+
+                    document.getElementById('modalGrandTotal').textContent = `₹${parseFloat(sale.total_amount).toFixed(2)}`;
+                    openModal('saleDetailsModal');
+                }
+            } catch (err) {
+                alert('Error loading invoice details');
+            }
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

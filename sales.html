@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales History - PharmaCare</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header class="app-header">
+        <div class="container navbar">
+            <nav class="top-nav-links">
+                <a href="dashboard.html" class="nav-item">Dashboard Overview</a>
+                <a href="medicines.html" class="nav-item">Medicine Management</a>
+                <a href="pos.html" class="nav-item">Billing</a>
+                <a href="sales.html" class="nav-item active">Sales History</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="index.html" class="btn btn-secondary btn-sm" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Storefront
+                </a>
+                <a href="#" onclick="handleLogout(event)" class="btn btn-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container dashboard-container">
+
+        <!-- SALES HISTORY TABLE PANEL -->
+        <div class="panel" style="margin-bottom: 0;">
+            <div class="panel-header">
+                <h3>Sales History &amp; Orders</h3>
+                <button class="btn btn-secondary btn-sm" onclick="loadSalesHistory()">Refresh</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Date &amp; Time</th>
+                            <th>Customer Name</th>
+                            <th>Customer Phone</th>
+                            <th>Payment Method</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesHistoryTableBody">
+                        <tr><td colspan="7" class="text-center">Loading sales history...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Sale Details Modal -->
+    <div id="saleDetailsModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3 id="modalInvoiceTitle">Invoice Details</h3>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeModal('saleDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalCustomerInfo" style="margin-bottom: 1.25rem; font-size: 0.9rem; background: var(--surface-alt); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border);"></div>
+                <div class="table-responsive">
+                    <table class="table" style="font-size: 0.88rem;">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalItemsBody"></tbody>
+                    </table>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 1.25rem; font-size: 1.15rem; font-weight:700;">
+                    <span>Grand Total:</span>
+                    <span id="modalGrandTotal" class="price-tag" style="font-size:1.35rem;">₹0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales History Script Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadSalesHistory();
+        });
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('api.php?action=check');
+                const result = await res.json();
+                if (!result.success) window.location.href = 'login.html';
+            } catch (err) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function handleLogout(e) {
+            if (e) e.preventDefault();
+            try { await fetch('api.php?action=logout'); } catch (err) {}
+            sessionStorage.removeItem('pharmacy_cart');
+            window.location.href = 'login.html';
+        }
+
+        async function loadSalesHistory() {
+            const tableBody = document.getElementById('salesHistoryTableBody');
+            if (!tableBody) return;
+
+            try {
+                const res = await fetch('api.php?action=sales');
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    tableBody.innerHTML = '';
+                    result.data.forEach(sale => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>#INV-${sale.id}</strong></td>
+                            <td>${sale.sale_date}</td>
+                            <td>${escapeHtml(sale.customer_name)}</td>
+                            <td>${escapeHtml(sale.customer_phone)}</td>
+                            <td>${escapeHtml(sale.payment_method || 'Cash')}</td>
+                            <td><strong class="price-tag">₹${parseFloat(sale.total_amount).toFixed(2)}</strong></td>
+                            <td><button class="btn btn-sm btn-secondary" onclick="viewSaleDetails(${sale.id})">View Items</button></td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="text-center" style="color:var(--text-muted);">No sales records found yet.</td></tr>';
+                }
+            } catch (err) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center" style="color:var(--danger);">Error loading sales history.</td></tr>';
+            }
+        }
+
+        async function viewSaleDetails(saleId) {
+            try {
+                const res = await fetch(`api.php?action=sales&id=${saleId}`);
+                const result = await res.json();
+
+                if (result.success) {
+                    const sale = result.data;
+                    document.getElementById('modalInvoiceTitle').textContent = `Invoice Details (#INV-${sale.id})`;
+                    document.getElementById('modalCustomerInfo').innerHTML = `
+                        <div><strong>Customer:</strong> ${escapeHtml(sale.customer_name)} (${escapeHtml(sale.customer_phone)})</div>
+                        <div><strong>Date:</strong> ${sale.sale_date}</div>
+                        <div><strong>Payment Method:</strong> ${escapeHtml(sale.payment_method || 'Cash')}</div>
+                    `;
+
+                    const modalBody = document.getElementById('modalItemsBody');
+                    modalBody.innerHTML = '';
+
+                    sale.items.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const lineTotal = item.quantity * item.price_at_time;
+                        tr.innerHTML = `
+                            <td>${escapeHtml(item.medicine_name || 'Medicine #' + item.medicine_id)}</td>
+                            <td>${item.quantity}</td>
+                            <td>₹${parseFloat(item.price_at_time).toFixed(2)}</td>
+                            <td>₹${lineTotal.toFixed(2)}</td>
+                        `;
+                        modalBody.appendChild(tr);
+                    });
+
+                    document.getElementById('modalGrandTotal').textContent = `₹${parseFloat(sale.total_amount).toFixed(2)}`;
+                    openModal('saleDetailsModal');
+                }
+            } catch (err) {
+                alert('Error loading invoice details');
+            }
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
