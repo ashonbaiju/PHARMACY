@@ -66,28 +66,11 @@
                     <div style="background: var(--surface-alt); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 1rem;">
                         <div class="form-group" style="margin-bottom: 0.75rem;">
                             <label class="form-label" for="posCustomerName" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Customer Name *</label>
-                            <input type="text" id="posCustomerName" class="form-control" placeholder="e.g. Name" required style="padding: 0.45rem 0.65rem; font-size: 0.85rem; height: 34px;">
+                            <input type="text" id="posCustomerName" class="form-control" placeholder="e.g. John Doe" required style="padding: 0.45rem 0.65rem; font-size: 0.85rem; height: 34px;">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label" for="posCustomerPhone" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Phone Number *</label>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <select id="posCustomerCountryCode" class="form-control" aria-label="Country calling code" style="flex: 0 0 100px; padding: 0.45rem 0.5rem; font-size: 0.85rem; height: 34px;">
-                                    <option value="+91" selected>+91 (IN)</option>
-                                    <option value="+1">+1 (US/CA)</option>
-                                    <option value="+44">+44 (UK)</option>
-                                    <option value="+61">+61 (AU)</option>
-                                    <option value="+971">+971 (UAE)</option>
-                                </select>
-                                <input type="tel" id="posCustomerPhone" class="form-control mono" placeholder="10-digit number" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" title="Enter exactly 10 digits." required style="flex: 1; min-width: 0; padding: 0.45rem 0.65rem; font-size: 0.85rem; height: 34px;">
-                            </div>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0.75rem;">
-                            <label class="form-label" for="posPaymentMethod" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Payment Method</label>
-                            <select id="posPaymentMethod" class="form-control" style="padding: 0.45rem 0.65rem; font-size: 0.85rem; height: 34px;">
-                                <option value="Cash" selected>Cash</option>
-                                <option value="UPI">UPI</option>
-                                <option value="Card">Card</option>
-                            </select>
+                            <input type="tel" id="posCustomerPhone" class="form-control mono" placeholder="e.g. +91 98765 43210" required style="padding: 0.45rem 0.65rem; font-size: 0.85rem; height: 34px;">
                         </div>
                     </div>
 
@@ -170,9 +153,6 @@
             });
 
             document.getElementById('posCheckoutForm')?.addEventListener('submit', handleCheckout);
-            document.getElementById('posCustomerPhone')?.addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
-            });
         });
 
         async function handleLogout(e) {
@@ -275,15 +255,11 @@
 
             const name = document.getElementById('posCustomerName').value.trim();
             const phone = document.getElementById('posCustomerPhone').value.trim();
-            const countryCode = document.getElementById('posCustomerCountryCode').value;
-            const paymentMethod = document.getElementById('posPaymentMethod').value;
             if (!name || !phone) return alert('Please enter customer name and phone.');
-            if (!/^\d{10}$/.test(phone)) return alert('Phone number must contain exactly 10 digits.');
 
             const payload = {
                 customer_name: name,
-                customer_phone: `${countryCode}${phone}`,
-                payment_method: paymentMethod,
+                customer_phone: phone,
                 items: cart.map(i => ({ medicine_id: i.id, quantity: i.quantity }))
             };
 
@@ -303,7 +279,6 @@
                 document.getElementById('receiptCustomerInfo').innerHTML = `
                     <div><strong>Customer:</strong> ${sale.customer_name}</div>
                     <div><strong>Phone:</strong> ${sale.customer_phone}</div>
-                    <div><strong>Payment Method:</strong> ${sale.payment_method}</div>
                 `;
                 
                 document.getElementById('receiptItemsBody').innerHTML = (sale.items || []).map(i => `

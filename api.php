@@ -4,13 +4,6 @@ require_once __DIR__ . '/db.php';
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
-if (in_array($action, ['sales', 'checkout'], true)) {
-    $paymentMethodColumn = $pdo->query("SHOW COLUMNS FROM sales LIKE 'payment_method'")->fetch();
-    if (!$paymentMethodColumn) {
-        $pdo->exec("ALTER TABLE sales ADD COLUMN payment_method ENUM('Cash', 'UPI', 'Card') NOT NULL DEFAULT 'Cash' AFTER customer_phone");
-    }
-}
-
 switch ($action) {
 
     // ==========================================
@@ -284,7 +277,7 @@ switch ($action) {
 
             sendJsonResponse(true, 'Sale details retrieved', $sale);
         } else {
-            $stmt = $pdo->query("SELECT id, customer_name, customer_phone, payment_method, total_amount, sale_date FROM sales ORDER BY sale_date DESC");
+            $stmt = $pdo->query("SELECT id, customer_name, customer_phone, total_amount, sale_date FROM sales ORDER BY sale_date DESC");
             $sales = $stmt->fetchAll();
             sendJsonResponse(true, 'Sales history retrieved', $sales);
         }
@@ -305,15 +298,10 @@ switch ($action) {
 
         $customerName = trim($input['customer_name'] ?? '');
         $customerPhone = trim($input['customer_phone'] ?? '');
-        $paymentMethod = $input['payment_method'] ?? 'Cash';
         $items = $input['items'] ?? [];
 
         if (empty($customerName) || empty($customerPhone)) {
             sendJsonResponse(false, 'Customer name and phone number are required.');
-        }
-
-        if (!in_array($paymentMethod, ['Cash', 'UPI', 'Card'], true)) {
-            sendJsonResponse(false, 'Invalid payment method.');
         }
 
         if (!is_array($items) || count($items) === 0) {
@@ -359,13 +347,12 @@ switch ($action) {
 
             // Insert sale record
             $saleStmt = $pdo->prepare("
-                INSERT INTO sales (customer_name, customer_phone, payment_method, total_amount, sale_date)
-                VALUES (:name, :phone, :payment_method, :total, NOW())
+                INSERT INTO sales (customer_name, customer_phone, total_amount, sale_date)
+                VALUES (:name, :phone, :total, NOW())
             ");
             $saleStmt->execute([
                 'name' => $customerName,
                 'phone' => $customerPhone,
-                'payment_method' => $paymentMethod,
                 'total' => $calculatedTotal
             ]);
             $saleId = $pdo->lastInsertId();
@@ -394,7 +381,6 @@ switch ($action) {
                 'sale_id' => $saleId,
                 'customer_name' => $customerName,
                 'customer_phone' => $customerPhone,
-                'payment_method' => $paymentMethod,
                 'total_amount' => $calculatedTotal,
                 'sale_date' => date('Y-m-d H:i:s'),
                 'items' => $verifiedItems

@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS `sales` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `customer_name` VARCHAR(100) NOT NULL,
     `customer_phone` VARCHAR(20) NOT NULL,
-    `payment_method` ENUM('Cash', 'UPI', 'Card') NOT NULL DEFAULT 'Cash',
     `total_amount` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     `sale_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

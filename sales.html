@@ -44,13 +44,12 @@
                             <th>Date &amp; Time</th>
                             <th>Customer Name</th>
                             <th>Customer Phone</th>
-                            <th>Payment Method</th>
                             <th>Total Amount</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="salesHistoryTableBody">
-                        <tr><td colspan="7" class="text-center">Loading sales history...</td></tr>
+                        <tr><td colspan="6" class="text-center">Loading sales history...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -129,17 +128,16 @@
                             <td>${sale.sale_date}</td>
                             <td>${escapeHtml(sale.customer_name)}</td>
                             <td>${escapeHtml(sale.customer_phone)}</td>
-                            <td>${escapeHtml(sale.payment_method || 'Cash')}</td>
                             <td><strong class="price-tag">₹${parseFloat(sale.total_amount).toFixed(2)}</strong></td>
                             <td><button class="btn btn-sm btn-secondary" onclick="viewSaleDetails(${sale.id})">View Items</button></td>
                         `;
                         tableBody.appendChild(tr);
                     });
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="7" class="text-center" style="color:var(--text-muted);">No sales records found yet.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--text-muted);">No sales records found yet.</td></tr>';
                 }
             } catch (err) {
-                tableBody.innerHTML = '<tr><td colspan="7" class="text-center" style="color:var(--danger);">Error loading sales history.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center" style="color:var(--danger);">Error loading sales history.</td></tr>';
             }
         }
 
@@ -154,7 +152,6 @@
                     document.getElementById('modalCustomerInfo').innerHTML = `
                         <div><strong>Customer:</strong> ${escapeHtml(sale.customer_name)} (${escapeHtml(sale.customer_phone)})</div>
                         <div><strong>Date:</strong> ${sale.sale_date}</div>
-                        <div><strong>Payment Method:</strong> ${escapeHtml(sale.payment_method || 'Cash')}</div>
                     `;
 
                     const modalBody = document.getElementById('modalItemsBody');
